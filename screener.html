@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Screener — MARKETO AI™</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#04080F;color:#F1F0FF;-webkit-font-smoothing:antialiased;min-height:100vh}
+:root{--bg:#04080F;--bg2:#080320;--card:#0C0A28;--card2:#12103A;--blue:#0066FF;--cyan:#00D4FF;--ok:#00D084;--bad:#FF4D4F;--warn:#FFB020;--text:#F1F0FF;--text2:#C4C0FF;--muted:#6B6890;--bdr:rgba(0,100,255,.15);--bdr2:rgba(0,212,255,.28);--fd:'Space Grotesk','Inter',system-ui;}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#080320}::-webkit-scrollbar-thumb{background:#0066FF;border-radius:2px}
+.topbar{height:58px;background:rgba(4,8,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px;padding:0 18px;position:sticky;top:0;z-index:100}
+.t-logo{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:16px;font-weight:800;color:var(--text)}.t-logo .ai{color:var(--cyan)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:inherit}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#0052CC}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--bdr2)}.btn-ghost:hover{background:rgba(0,100,255,.08);color:#fff}
+.main{max-width:1280px;margin:0 auto;padding:24px}
+.pg-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.pg-sub{font-size:12px;color:var(--muted);margin-bottom:22px}
+.layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+/* FILTER PANEL */
+.filter-panel{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px;position:sticky;top:76px}
+.fp-title{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.fgroup{margin-bottom:16px}
+.flabel{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.frow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.frow label{font-size:11px;color:var(--muted);width:32px;flex-shrink:0}
+.finput{background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;outline:none;width:100%;font-family:inherit}
+.finput:focus{border-color:var(--bdr2)}
+.preset-btns{display:flex;flex-direction:column;gap:6px}
+.preset{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:rgba(255,255,255,.03);color:var(--text2);transition:all .2s;text-align:left}
+.preset:hover{border-color:var(--bdr2);color:var(--text);background:rgba(0,100,255,.08)}
+/* RESULTS */
+.results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.results-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text)}
+.results-count{font-size:12px;color:var(--muted)}
+.tbl-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:14px;overflow:hidden}
+.stbl{width:100%;border-collapse:collapse}
+.stbl th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:11px 13px;text-align:left;border-bottom:1px solid var(--bdr);background:var(--card2);white-space:nowrap}
+.stbl td{padding:9px 13px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.stbl tr:last-child td{border-bottom:none}
+.stbl tr:hover td{background:rgba(0,100,255,.04)}
+.sn{font-weight:600;color:var(--text);font-size:13px}
+.ssec{font-size:10px;color:var(--muted)}
+.score-chip{display:inline-flex;align-items:center;justify-content:center;width:36px;height:20px;border-radius:5px;font-size:10px;font-weight:800}
+.sc-hi{background:rgba(0,208,132,.15);color:var(--ok)}.sc-md{background:rgba(255,176,32,.12);color:var(--warn)}.sc-lo{background:rgba(255,77,79,.12);color:var(--bad)}
+.sig-b{display:inline-block;padding:2px 8px;border-radius:5px;font-size:9px;font-weight:700;background:rgba(0,208,132,.12);color:var(--ok)}
+.sig-h{display:inline-block;padding:2px 8px;border-radius:5px;font-size:9px;font-weight:700;background:rgba(255,176,32,.12);color:var(--warn)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.filter-panel{position:static}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="t-logo"><svg viewBox="0 0 32 32" width="26" height="26" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="15" fill="#0A1842" stroke="#0066FF" stroke-width="1.5"/><rect x="7" y="10" width="18" height="14" rx="4.5" fill="#001433"/><circle cx="12" cy="17" r="3" fill="#00D4FF"/><circle cx="20" cy="17" r="3" fill="#00D4FF"/></svg>MARKETO <span class="ai">AI™</span></a>
+  <span style="font-size:13px;color:var(--muted);padding:4px 12px;background:rgba(0,212,255,.08);border-radius:20px;border:1px solid var(--bdr2)">🔥 Advanced Screener</span>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <a href="dashboard.html" class="btn btn-ghost">Dashboard</a>
+    <a href="brain.html" class="btn btn-blue">Marketo Brain™</a>
+  </div>
+</header>
+<div class="main">
+  <div class="pg-title">Advanced Stock Screener</div>
+  <div class="pg-sub">Filter NSE stocks by fundamentals, technicals, and MARKETO SCORE™</div>
+  <div class="layout">
+    <!-- FILTERS -->
+    <div class="filter-panel">
+      <div class="fp-title">⚙️ Filters</div>
+      <div class="fgroup">
+        <div class="flabel">Fundamentals</div>
+        <div class="frow"><label>PE</label><input class="finput" id="maxPE" placeholder="Max PE (e.g. 40)" type="number"></div>
+        <div class="frow"><label>ROE%</label><input class="finput" id="minROE" placeholder="Min ROE% (e.g. 15)" type="number"></div>
+        <div class="frow"><label>ROCE%</label><input class="finput" id="minROCE" placeholder="Min ROCE% (e.g. 15)" type="number"></div>
+      </div>
+      <div class="fgroup">
+        <div class="flabel">Technical</div>
+        <div class="frow"><label>RSI</label><input class="finput" id="maxRSI" placeholder="Max RSI (e.g. 70)" type="number"></div>
+        <div class="frow"><label>Score</label><input class="finput" id="minScore" placeholder="Min MARKETO Score" type="number"></div>
+      </div>
+      <div class="fgroup">
+        <div class="flabel">AI Presets</div>
+        <div class="preset-btns">
+          <button class="preset" onclick="loadPreset('qglp')">🧠 QGLP Quality Stocks</button>
+          <button class="preset" onclick="loadPreset('smile')">😊 SMILE Mid-Caps</button>
+          <button class="preset" onclick="loadPreset('value')">💎 Deep Value</button>
+          <button class="preset" onclick="loadPreset('momentum')">🚀 High Momentum</button>
+          <button class="preset" onclick="loadPreset('dividend')">💰 High Dividend</button>
+        </div>
+      </div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center;margin-top:6px" onclick="runScreen()">🔍 Run Screen</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px" onclick="clearFilters()">Clear All</button>
+    </div>
+    <!-- RESULTS -->
+    <div>
+      <div class="results-head">
+        <div class="results-title">Screening Results</div>
+        <div class="results-count" id="rCount">0 stocks found</div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="stbl">
+          <thead><tr><th>Stock</th><th>PE</th><th>ROE%</th><th>ROCE%</th><th>RSI</th><th>MARKETO Score</th><th>52W</th><th>Signal</th></tr></thead>
+          <tbody id="screenBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const STOCKS=[
+  {n:'ITC',s:'FMCG',pe:28,roe:28,roce:32,rsi:58,score:84,w52:'Near High',sig:'BUY'},
+  {n:'POLYCAB',s:'Cables',pe:34,roe:22,roce:26,rsi:62,score:79,w52:'Near High',sig:'BUY'},
+  {n:'SIEMENS',s:'Cap Goods',pe:62,roe:18,roce:22,rsi:55,score:74,w52:'Mid',sig:'HOLD'},
+  {n:'TORNTPOWER',s:'Power',pe:24,roe:16,roce:14,rsi:52,score:68,w52:'Mid',sig:'HOLD'},
+  {n:'TRIVENI',s:'Water',pe:38,roe:24,roce:28,rsi:64,score:77,w52:'Near High',sig:'BUY'},
+  {n:'SBILIFE',s:'Insurance',pe:72,roe:15,roce:12,rsi:60,score:72,w52:'Mid',sig:'HOLD'},
+  {n:'ICICIGI',s:'Insurance',pe:38,roe:18,roce:16,rsi:56,score:81,w52:'Near High',sig:'HOLD'},
+  {n:'HDFCLIFE',s:'Insurance',pe:82,roe:14,roce:11,rsi:48,score:70,w52:'Mid',sig:'HOLD'},
+  {n:'WIPRO',s:'IT',pe:26,roe:17,roce:19,rsi:54,score:66,w52:'Mid',sig:'HOLD'},
+  {n:'TCS',s:'IT',pe:30,roe:48,roce:52,rsi:58,score:86,w52:'Near High',sig:'HOLD'},
+  {n:'SHRIRAMFIN',s:'Finance',pe:14,roe:16,roce:14,rsi:52,score:75,w52:'Near High',sig:'BUY'},
+  {n:'ZENTEC',s:'IT',pe:18,roe:22,roce:24,rsi:60,score:78,w52:'Mid',sig:'BUY'},
+  {n:'VGUARD',s:'Consumer',pe:40,roe:18,roce:20,rsi:55,score:70,w52:'Mid',sig:'HOLD'},
+  {n:'TATVA',s:'Water',pe:44,roe:20,roce:18,rsi:58,score:74,w52:'Near High',sig:'HOLD'},
+  {n:'GICRE',s:'Insurance',pe:12,roe:14,roce:12,rsi:50,score:72,w52:'Mid',sig:'BUY'},
+  {n:'HYUNDAI',s:'Auto',pe:22,roe:24,roce:28,rsi:62,score:76,w52:'Near High',sig:'BUY'},
+  {n:'VINDHYATEL',s:'Telecom',pe:16,roe:28,roce:32,rsi:64,score:82,w52:'Near High',sig:'BUY'},
+  {n:'TIPSFILMS',s:'Media',pe:18,roe:22,roce:24,rsi:56,score:74,w52:'Mid',sig:'BUY'},
+  {n:'PATANJALI',s:'FMCG',pe:46,roe:22,roce:20,rsi:60,score:71,w52:'Near High',sig:'BUY'},
+  {n:'NAVNETEDUL',s:'Education',pe:22,roe:26,roce:28,rsi:52,score:73,w52:'Mid',sig:'HOLD'},
+];
+let results=[...STOCKS];
+function render(data){
+  document.getElementById('rCount').textContent=data.length+' stocks found';
+  document.getElementById('screenBody').innerHTML=data.map(s=>{
+    const sc=s.score>=80?'sc-hi':s.score>=65?'sc-md':'sc-lo';
+    const sg=s.sig==='BUY'?'sig-b':'sig-h';
+    return`<tr><td><div class="sn">${s.n}</div><div class="ssec">${s.s}</div></td><td>${s.pe}x</td><td style="color:${s.roe>=20?'var(--ok)':'var(--text)'}">${s.roe}%</td><td style="color:${s.roce>=20?'var(--ok)':'var(--text)'}">${s.roce}%</td><td style="color:${s.rsi>70?'var(--bad)':s.rsi<30?'var(--ok)':'var(--text)'}">${s.rsi}</td><td><span class="score-chip ${sc}">${s.score}</span></td><td style="font-size:11px;color:var(--muted)">${s.w52}</td><td><span class="${sg}">${s.sig}</span></td></tr>`;
+  }).join('');
+}
+function runScreen(){
+  const maxPE=+document.getElementById('maxPE').value||999;
+  const minROE=+document.getElementById('minROE').value||0;
+  const minROCE=+document.getElementById('minROCE').value||0;
+  const maxRSI=+document.getElementById('maxRSI').value||100;
+  const minScore=+document.getElementById('minScore').value||0;
+  results=STOCKS.filter(s=>s.pe<=maxPE&&s.roe>=minROE&&s.roce>=minROCE&&s.rsi<=maxRSI&&s.score>=minScore);
+  render(results);
+}
+function clearFilters(){['maxPE','minROE','minROCE','maxRSI','minScore'].forEach(id=>document.getElementById(id).value='');render(STOCKS);}
+const PRESETS={
+  qglp:{minROE:15,minROCE:15,minScore:70},
+  smile:{maxPE:40,minROE:18,minScore:65},
+  value:{maxPE:20,minROE:12},
+  momentum:{maxRSI:70,minScore:75},
+  dividend:{maxPE:25,minROE:15}
+};
+function loadPreset(p){
+  clearFilters();
+  const pr=PRESETS[p];
+  if(pr.maxPE)document.getElementById('maxPE').value=pr.maxPE;
+  if(pr.minROE)document.getElementById('minROE').value=pr.minROE;
+  if(pr.minROCE)document.getElementById('minROCE').value=pr.minROCE;
+  if(pr.maxRSI)document.getElementById('maxRSI').value=pr.maxRSI;
+  if(pr.minScore)document.getElementById('minScore').value=pr.minScore;
+  runScreen();
+}
+render(STOCKS);
+</script>
+</body>
+</html>
