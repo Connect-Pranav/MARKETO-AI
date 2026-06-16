@@ -1,0 +1,202 @@
+/* =============================================
+   MARKETO AI™ — ANIMATIONS
+   ============================================= */
+
+/* STAGGER ANIMATIONS */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* GLOW EFFECTS */
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168,85,247,0.4), 0 0 40px rgba(168,85,247,0.2);
+}
+.glow-green {
+  box-shadow: 0 0 20px rgba(16,185,129,0.4), 0 0 40px rgba(16,185,129,0.2);
+}
+.glow-red {
+  box-shadow: 0 0 20px rgba(239,68,68,0.4), 0 0 40px rgba(239,68,68,0.2);
+}
+
+/* SHIMMER EFFECT */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: shimmer 3s infinite;
+}
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* TYPEWRITER */
+.typewriter {
+  overflow: hidden;
+  border-right: 2px solid #A855F7;
+  white-space: nowrap;
+  animation: typewriter 3s steps(40) forwards, blink 0.75s step-end infinite;
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* SCAN LINE */
+.scan-line {
+  position: relative;
+  overflow: hidden;
+}
+.scan-line::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.6), transparent);
+  top: -2px;
+  animation: scan 2s linear infinite;
+}
+@keyframes scan {
+  from { top: -2px; }
+  to { top: 100%; }
+}
+
+/* DATA STREAM */
+@keyframes dataStream {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* ROBOT ANIMATIONS */
+.robot-idle { animation: float 3.5s ease-in-out infinite; }
+.robot-thinking { animation: think 0.8s ease-in-out infinite; }
+.robot-happy { animation: jump 0.5s ease-in-out 3; }
+.robot-greeting { animation: greet 1s ease-out; }
+
+@keyframes think {
+  0%,100% { transform: rotate(-3deg) translateY(0); }
+  50% { transform: rotate(3deg) translateY(-5px); }
+}
+@keyframes jump {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes greet {
+  0% { transform: translateX(-100px) rotate(-10deg); opacity: 0; }
+  60% { transform: translateX(10px) rotate(5deg); opacity: 1; }
+  80% { transform: translateX(-5px) rotate(-2deg); }
+  100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
+/* PARTICLE SYSTEM */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #A855F7;
+  animation: particleOrbit var(--dur, 3s) linear infinite;
+  transform-origin: var(--tx, 60px) var(--ty, 60px);
+}
+@keyframes particleOrbit {
+  from { transform: rotate(0deg) translateX(var(--r, 60px)); }
+  to { transform: rotate(360deg) translateX(var(--r, 60px)); }
+}
+
+/* COUNTING ANIMATION */
+.count-up { transition: all 1s ease-out; }
+
+/* PROGRESS BAR ANIMATION */
+.bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  animation: barFill 1.5s ease-out forwards;
+  transform-origin: left;
+}
+@keyframes barFill {
+  from { width: 0; }
+}
+
+/* CARD HOVER LIFT */
+.lift:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(124,58,237,0.2); }
+
+/* SPIN */
+.spin { animation: spin 2s linear infinite; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* PULSE RING */
+.pulse-ring {
+  position: relative;
+}
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid #A855F7;
+  animation: pulseRing 2s ease-out infinite;
+}
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* NEURAL NETWORK BG */
+.neural-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.neural-bg canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* GLITCH EFFECT */
+.glitch {
+  position: relative;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+.glitch:hover::before {
+  color: #00FFFF;
+  left: 2px;
+  opacity: 0.6;
+  animation: glitch1 0.3s linear;
+}
+.glitch:hover::after {
+  color: #FF00FF;
+  left: -2px;
+  opacity: 0.6;
+  animation: glitch2 0.3s linear;
+}
+@keyframes glitch1 {
+  0%,100% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); transform: translateX(-2px); }
+  50% { clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); transform: translateX(2px); }
+}
+@keyframes glitch2 {
+  0%,100% { clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); transform: translateX(2px); }
+  50% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); transform: translateX(-2px); }
+}
