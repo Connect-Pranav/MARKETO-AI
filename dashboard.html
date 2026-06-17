@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard — MARKETO AI™</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#04080F;color:#F1F0FF;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+:root{
+  --bg:#04080F;--bg2:#060918;--card:rgba(11,9,32,.92);--card2:#12103A;
+  --blue:#0066FF;--cyan:#00D4FF;--purple:#A855F7;
+  --ok:#00D084;--bad:#FF4D4F;--warn:#FFB020;--orange:#FF6B00;
+  --text:#F1F0FF;--text2:#C4C0FF;--muted:#5A5880;
+  --bdr:rgba(0,100,255,.14);--bdr2:rgba(0,212,255,.28);
+  --fd:'Space Grotesk','Inter',system-ui;
+}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,150,255,.3);border-radius:2px}
+
+/* ═══════════════════════════════════
+   SHELL: topbar → hticker → body
+═══════════════════════════════════ */
+.shell{
+  display:grid;
+  grid-template-rows:50px 36px 1fr;
+  height:100vh;overflow:hidden;
+}
+
+/* ────────────────────────────────
+   TOP BAR
+──────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:rgba(4,8,15,.98);border-bottom:1px solid var(--bdr);z-index:300;
+}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--text);flex-shrink:0;text-decoration:none}
+.logo .ai{color:var(--cyan)}
+/* Search */
+.srchwrap{flex:1;max-width:340px;position:relative;margin:0 6px}
+.srchinp{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:20px;padding:6px 12px 6px 30px;color:var(--text);font-size:12px;outline:none;font-family:inherit;transition:all .2s}
+.srchinp:focus{border-color:var(--bdr2);background:rgba(255,255,255,.09);border-radius:8px}
+.srchinp::placeholder{color:var(--muted)}
+.srch-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+.srch-drop{position:absolute;top:calc(100% + 5px);left:0;right:0;background:#0D0B2A;border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;z-index:9999;display:none;box-shadow:0 16px 48px rgba(0,0,0,.75)}
+.srch-drop.open{display:block}
+.sri{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:12px}
+.sri:last-child{border-bottom:none}
+.sri:hover{background:rgba(0,100,255,.14)}
+.sri-n{font-weight:700;color:var(--text)}.sri-s{font-size:10px;color:var(--muted)}
+.sri-p{font-weight:700;color:var(--cyan)}.sri-c{font-size:10px;font-weight:600}
+.top-r{display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#0052CC}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--bdr2)}.btn-ghost:hover{background:rgba(0,100,255,.1);color:#fff}
+.btn-orange{background:rgba(255,107,0,.12);color:var(--orange);border-color:rgba(255,107,0,.3)}.btn-orange:hover{background:rgba(255,107,0,.2)}
+.bell{width:28px;height:28px;border-radius:7px;background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.28);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;position:relative;flex-shrink:0}
+.bell-dot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--bad);box-shadow:0 0 5px var(--bad)}
+.avt{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4FF);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
+/* TOP-RIGHT nav pills */
+.top-nav{display:flex;align-items:center;gap:4px;margin:0 6px}
+.tp{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tp:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.tp.on{color:var(--cyan);background:rgba(0,212,255,.08);font-weight:600}
+
+/* ────────────────────────────────
+   HORIZONTAL STOCK TICKER
+──────────────────────────────── */
+.hticker{
+  display:flex;align-items:center;
+  background:rgba(5,8,20,.98);border-bottom:1px solid var(--bdr);
+  overflow:hidden;
+}
+.hticker-lbl{
+  font-size:9px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:.8px;
+  padding:0 10px;flex-shrink:0;white-space:nowrap;height:100%;display:flex;align-items:center;
+  background:rgba(0,100,255,.1);border-right:1px solid var(--bdr);
+}
+.hticker-track{flex:1;overflow:hidden;position:relative;height:100%}
+.hticker-inner{
+  display:inline-flex;gap:0;white-space:nowrap;height:100%;align-items:center;
+  animation:htick 55s linear infinite;
+}
+.hticker-inner.paused{animation-play-state:paused!important}
+@keyframes htick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.hti{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 16px;height:100%;cursor:pointer;
+  border-right:1px solid rgba(255,255,255,.05);
+  transition:background .15s;flex-shrink:0;
+}
+.hti:hover{background:rgba(0,100,255,.16)}
+.hti-name{font-size:11px;font-weight:700;color:var(--text2)}
+.hti-price{font-size:11px;font-weight:700;color:var(--text)}
+.hti-arr{font-size:12px;font-weight:900;line-height:1}
+.hti-chg{font-size:11px;font-weight:700}
+
+/* ────────────────────────────────
+   BODY: [sidebar 190px] [main]
+──────────────────────────────── */
+.body{display:grid;grid-template-columns:190px 1fr;height:100%;overflow:hidden}
+
+/* ────────────────────────────────
+   SIDEBAR (Navigation Panel)
+──────────────────────────────── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--bdr);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sb-brand{
+  display:flex;align-items:center;gap:7px;padding:10px 11px;
+  border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+.sb-brand-name{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--text)}
+.sb-brand-name span{color:var(--cyan)}
+.sbnav{padding:8px 7px;display:flex;flex-direction:column;gap:1px}
+.sg{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;padding:8px 8px 3px}
+.sl{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .14s;text-decoration:none;border:1px solid transparent}
+.sl:hover{background:rgba(0,100,255,.09);color:var(--text)}
+.sl.on{background:rgba(0,100,255,.14);color:var(--cyan);font-weight:600;border-color:rgba(0,212,255,.15)}
+.sl-ic{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.stag{margin-left:auto;font-size:8px;font-weight:700;padding:1px 5px;border-radius:5px}
+.tag-c{background:rgba(0,212,255,.15);color:var(--cyan)}.tag-g{background:rgba(0,208,132,.15);color:var(--ok)}
+.tag-r{background:rgba(255,77,79,.15);color:var(--bad)}.tag-o{background:rgba(255,107,0,.15);color:var(--orange)}
+.sdiv{height:1px;background:var(--bdr);margin:5px 7px}
+.sact{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .14s;background:rgba(0,212,255,.05);border:1px solid var(--bdr);margin:2px 4px}
+.sact:hover{color:var(--text);border-color:var(--bdr2)}
+
+/* ────────────────────────────────
+   MAIN AREA
+──────────────────────────────── */
+.main{display:flex;flex-direction:column;overflow:hidden}
+
+/* PAGE TABS */
+.tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--bg2);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .18s;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);font-weight:600}
+
+/* PAGES */
+.page{display:none;flex:1;overflow-y:auto;padding:12px}
+.page.on{display:block}
+
+/* ────────────────────────────────
+   DASHBOARD GRID (exact wireframe)
+   ┌──────────────────────┬────────────┐
+   │ Nifty | BNifty | VIX | CNBC Live  │
+   │ PCR                  │            │
+   ├──────┬──────┬────────┤            │
+   │Hmap  │Score │AI Picks│            │
+   ├──────┴──────┴────────┼────────────┤
+   │ Top Gainers │ Losers │ News Bullet│
+   └─────────────┴────────┴────────────┘
+──────────────────────────────── */
+.dash-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 240px;
+  grid-template-rows:auto auto 1fr;
+  gap:10px;
+  height:100%;
+  /* row 1: stats, row 2: heatmap+score+picks, row 3: gainers+losers+newsbullets */
+}
+
+/* Stats row (col 1-3) */
+.dash-stats{grid-column:1/4;grid-row:1;display:grid;grid-template-columns:2fr 2fr 1fr 1fr;gap:8px}
+
+/* Right column (CNBC) spans rows 1-2 */
+.dash-right{grid-column:4;grid-row:1/3;display:flex;flex-direction:column;gap:8px}
+
+/* Middle row */
+.dash-hmap{grid-column:1;grid-row:2}
+.dash-score{grid-column:2;grid-row:2}
+.dash-picks{grid-column:3;grid-row:2}
+
+/* Bottom row */
+.dash-gainers{grid-column:1/2;grid-row:3;min-height:0}
+.dash-losers {grid-column:2/4;grid-row:3;min-height:0}
+.dash-news   {grid-column:4;grid-row:3;min-height:0}
+
+/* ────────────────────────────────
+   GLASS CARD
+──────────────────────────────── */
+.gc{
+  background:rgba(10,8,28,.88);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;padding:11px;
+  transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column;
+}
+.gc:hover{border-color:rgba(0,180,255,.2)}
+.gc-t{font-family:var(--fd);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chip{display:inline-block;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700}
+.chip-g{background:rgba(0,208,132,.12);color:var(--ok)}.chip-b{background:rgba(255,77,79,.12);color:var(--bad)}
+.chip-c{background:rgba(0,212,255,.12);color:var(--cyan)}.chip-w{background:rgba(255,176,32,.12);color:var(--warn)}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:ldP 2s infinite;display:inline-block;flex-shrink:0}
+@keyframes ldP{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+
+/* ────────────────────────────────
+   STAT CARDS
+──────────────────────────────── */
+.stat{
+  background:rgba(10,8,28,.88);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:11px 13px;position:relative;overflow:hidden;transition:all .2s;
+}
+.stat:hover{border-color:rgba(0,212,255,.2);transform:translateY(-1px)}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.s-ok::before{background:var(--ok)}.s-bad::before{background:var(--bad)}
+.s-warn::before{background:var(--warn)}.s-cyan::before{background:var(--cyan)}
+.stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-v{font-size:clamp(14px,2vw,20px);font-weight:800;font-family:var(--fd);margin-bottom:3px}
+.stat-c{font-size:10px;font-weight:600}
+
+/* ────────────────────────────────
+   SECTOR HEATMAP
+──────────────────────────────── */
+.hmap{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1}
+.hm{border-radius:7px;padding:7px 6px;text-align:center;cursor:pointer;transition:transform .15s}
+.hm:hover{transform:scale(1.06)}
+.hm-n{font-size:9px;font-weight:700;margin-bottom:2px}
+.hm-v{font-size:11px;font-weight:800;font-family:var(--fd)}
+.hm-s{font-size:8px;margin-top:1px;opacity:.6}
+
+/* ────────────────────────────────
+   MARKETO SCORE DONUT
+──────────────────────────────── */
+.donut-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:center}
+.donut-rel{position:relative;display:flex;align-items:center;justify-content:center}
+.donut-num{font-size:24px;font-weight:900;font-family:var(--fd);color:var(--cyan);position:absolute}
+.sbr{display:flex;align-items:center;gap:5px;font-size:10px;margin-bottom:4px}
+.sbl{color:var(--muted);width:62px;flex-shrink:0;font-size:9px}
+.sbw{flex:1;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.sbf{height:100%;border-radius:2px}.sbv{width:20px;text-align:right;font-weight:700;font-size:9px;flex-shrink:0}
+
+/* ────────────────────────────────
+   AI PICKS
+──────────────────────────────── */
+.pick{display:flex;align-items:center;gap:7px;padding:7px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:5px;cursor:pointer;transition:all .15s}
+.pick:hover{border-color:var(--bdr2);background:rgba(0,100,255,.07)}
+.pav{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.pn{font-size:11px;font-weight:600;color:var(--text)}.pw{font-size:9px;color:var(--muted)}
+.psc{margin-left:auto;text-align:right;flex-shrink:0}
+.psn{font-size:13px;font-weight:800;font-family:var(--fd);color:var(--cyan)}.psl{font-size:8px;color:var(--muted)}
+
+/* ────────────────────────────────
+   GAINERS / LOSERS TABLE
+──────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:6px 8px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(0,100,255,.05)}
+.sn{font-weight:600;color:var(--text);font-size:12px}.ss{font-size:9px;color:var(--muted)}
+.sig{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700}
+.sig-b{background:rgba(0,208,132,.12);color:var(--ok)}.sig-h{background:rgba(255,176,32,.12);color:var(--warn)}.sig-e{background:rgba(255,77,79,.12);color:var(--bad)}
+
+/* ────────────────────────────────
+   NEWS BULLETS
+──────────────────────────────── */
+.news-bullet{display:flex;gap:7px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.news-bullet:last-child{border-bottom:none}
+.nb-dot{width:4px;height:4px;border-radius:50%;background:var(--cyan);flex-shrink:0;margin-top:5px}
+.nb-txt{font-size:10px;color:rgba(255,255,255,.62);line-height:1.5}
+.nb-tag{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-bottom:2px}
+
+/* ────────────────────────────────
+   RIGHT COLUMN: CNBC Live Streaming
+──────────────────────────────── */
+.cnbc-section{
+  background:rgba(10,8,28,.9);backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.cnbc-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 11px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;
+  background:rgba(0,0,0,.2);
+}
+.cnbc-hd-t{font-family:var(--fd);font-size:11px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.live-pill{display:flex;align-items:center;gap:4px;background:rgba(220,0,0,.9);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px}
+.live-d{width:5px;height:5px;border-radius:50%;background:#fff;animation:ldP 1s infinite}
+
+/* Channel selector tabs */
+.ch-tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.ch-tabs::-webkit-scrollbar{display:none}
+.ch-tab{padding:6px 10px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.ch-tab:hover{color:var(--text)}
+.ch-tab.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+/* Player area */
+.ch-player-wrap{flex:1;position:relative;min-height:0}
+.ch-iframe{width:100%;height:100%;border:none;display:none}
+.ch-iframe.on{display:block}
+.ch-iframe iframe{width:100%!important;height:100%!important;display:block}
+.ch-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;padding:16px;
+}
+.ch-placeholder.hidden{display:none}
+.ch-logo{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.ch-pname{font-size:13px;font-weight:700;color:var(--text)}
+.ch-pdesc{font-size:10px;color:var(--muted);text-align:center;line-height:1.5}
+/* Volume controls */
+.ch-vol-row{
+  display:none;align-items:center;gap:8px;padding:7px 10px;
+  border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.25);flex-shrink:0;
+}
+.ch-vol-btn{
+  width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);color:var(--text);font-size:12px;cursor:pointer;
+  flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.ch-vol-btn:hover{background:rgba(0,212,255,.15);border-color:var(--bdr2)}
+.ch-vol-slider{
+  flex:1;height:4px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.12);
+  border-radius:2px;outline:none;cursor:pointer;
+}
+.ch-vol-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;
+  background:var(--cyan);cursor:pointer;box-shadow:0 0 6px rgba(0,212,255,.6);
+}
+.ch-vol-slider::-moz-range-thumb{
+  width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer;border:none;
+  box-shadow:0 0 6px rgba(0,212,255,.6);
+}
+.ch-vol-pct{font-size:10px;font-weight:700;color:var(--text2);width:32px;text-align:right;flex-shrink:0}
+/* URL paste row */
+.ch-paste-row{
+  display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.07);
+  background:rgba(0,0,0,.2);flex-shrink:0;
+}
+.ch-url-inp{
+  flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:7px;padding:6px 9px;color:var(--text);font-size:10px;outline:none;
+  font-family:inherit;transition:border-color .2s;
+}
+.ch-url-inp:focus{border-color:var(--bdr2)}
+.ch-url-inp::placeholder{color:var(--muted)}
+.ch-play-btn{
+  padding:6px 11px;border-radius:7px;font-size:10px;font-weight:700;
+  color:#fff;border:none;cursor:pointer;transition:all .18s;flex-shrink:0;
+}
+.ch-play-btn:hover{filter:brightness(1.15);transform:scale(1.03)}
+.ch-clear-btn{
+  padding:6px 9px;border-radius:7px;font-size:10px;font-weight:700;
+  color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:all .18s;flex-shrink:0;
+}
+.ch-clear-btn:hover{color:var(--text);background:rgba(255,255,255,.12)}
+/* Open links */
+.ch-links{display:flex;gap:6px;padding:7px 10px;border-top:1px solid rgba(255,255,255,.05);flex-shrink:0}
+.ch-link{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:5px;border-radius:6px;font-size:10px;font-weight:700;color:#fff;text-decoration:none;transition:all .18s}
+.ch-link:hover{filter:brightness(1.15)}
+
+/* ────────────────────────────────
+   BROKER MODAL
+──────────────────────────────── */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.mbg.open{display:flex}
+/* ── RESEARCH PANEL ── */
+.rsch-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);padding:24px}
+.rsch-bg.open{display:flex}
+.rsch-modal{background:#08061C;border:1px solid var(--bdr2);border-radius:18px;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 30px 100px rgba(0,0,0,.9);overflow:hidden}
+.rsch-hd{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--bdr);background:linear-gradient(135deg,rgba(0,100,255,.1),rgba(168,85,247,.06));flex-shrink:0}
+.rsch-hd-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#0066FF,#00D4FF);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rsch-hd-t{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--text)}
+.rsch-hd-s{font-size:11px;color:var(--muted)}
+.rsch-close{margin-left:auto;background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;transition:color .2s}
+.rsch-close:hover{color:var(--text)}
+.rsch-body{flex:1;overflow-y:auto;padding:18px 22px}
+.rsch-score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.rsch-score-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center}
+.rsch-score-v{font-size:18px;font-weight:800;font-family:var(--fd)}
+.rsch-score-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.rsch-verdict{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:11px;margin-bottom:16px}
+.rsch-verdict-icon{font-size:22px}
+.rsch-verdict-t{font-size:13px;font-weight:800}
+.rsch-verdict-s{font-size:11px;color:var(--text2);margin-top:1px}
+.rsch-section{margin-bottom:16px}
+.rsch-section-t{font-size:12px;font-weight:800;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px}
+.rsch-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rsch-fact{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11.5px}
+.rsch-fact:last-child{border-bottom:none}
+.rsch-fact-l{color:var(--muted)}.rsch-fact-v{font-weight:700;color:var(--text)}
+.rsch-list-item{display:flex;gap:8px;padding:5px 0;font-size:11.5px;color:var(--text2);line-height:1.6}
+.rsch-list-dot{flex-shrink:0;margin-top:2px}
+.rsch-guru-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;margin-bottom:7px}
+.rsch-guru-name{font-size:11.5px;font-weight:700;color:var(--text);margin-bottom:4px}
+.rsch-guru-verdict{font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;display:inline-block}
+.rsch-cta{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);border-radius:11px;padding:12px 14px;text-align:center;margin-top:6px}
+.rsch-cta-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--blue);color:#fff;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .2s;margin-top:8px}
+.rsch-cta-btn:hover{background:#0052CC}
+.rsch-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px 20px;color:var(--muted)}
+.rsch-spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(0,212,255,.15);border-top-color:var(--cyan);animation:rschspin .8s linear infinite}
+@keyframes rschspin{to{transform:rotate(360deg)}}
+.sri-research{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:var(--cyan);padding:3px 8px;border-radius:6px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.06);margin-top:2px;width:fit-content}
+.sri-research:hover{background:rgba(0,212,255,.14)}
+.modal{background:#0A0824;border:1px solid var(--bdr2);border-radius:20px;padding:24px;max-width:480px;width:92%;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.9)}
+.modal-x{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;transition:color .2s}
+.modal-x:hover{color:var(--text)}
+.modal-t{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.modal-s{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.broker-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bkr{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 8px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .22s}
+.bkr:hover{border-color:rgba(255,255,255,.22);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.bkr-logo{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.bkr-name{font-size:11px;font-weight:700;color:var(--text);text-align:center}
+.bkr-type{font-size:9px;color:var(--muted);text-align:center}
+
+/* ── MARKETO AGENT ── */
+.mk-float{position:fixed;bottom:16px;right:16px;z-index:600;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.mk-bubble{background:#0A0824;border:1.5px solid var(--bdr2);border-radius:10px 10px 0 10px;padding:8px 12px;font-size:11px;color:var(--cyan);font-weight:500;max-width:190px;text-align:right;line-height:1.5;display:none}
+.mk-btn{background:transparent;border:none;cursor:pointer;padding:0;filter:drop-shadow(0 0 14px rgba(0,150,255,.55));transition:transform .2s}
+.mk-btn:hover{transform:scale(1.1)}
+.mk-anim{animation:mkflt 3.5s ease-in-out infinite}
+/* ── Real floating chat panel ── */
+.mk-chat-panel{
+  position:fixed;bottom:84px;right:16px;z-index:650;
+  width:320px;max-height:440px;background:#0A0824;
+  border:1px solid var(--bdr2);border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  display:none;flex-direction:column;overflow:hidden;
+}
+.mk-chat-panel.open{display:flex}
+.mk-chat-hd{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  background:linear-gradient(135deg,rgba(0,100,255,.12),rgba(0,212,255,.06));
+  border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+.mk-chat-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4FF);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mk-chat-hd-t{font-size:12px;font-weight:700;color:var(--text)}
+.mk-chat-hd-s{font-size:9px;color:var(--ok);display:flex;align-items:center;gap:4px}
+.mk-chat-hd-dot{width:5px;height:5px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok)}
+.mk-chat-x{margin-left:auto;background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;line-height:1;padding:2px}
+.mk-chat-x:hover{color:var(--text)}
+.mk-chat-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-height:160px;max-height:240px}
+.mk-cmsg{max-width:85%;padding:8px 11px;border-radius:10px;font-size:11.5px;line-height:1.55}
+.mk-cmsg.bot{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.mk-cmsg.user{background:linear-gradient(135deg,#0052CC,#0066FF);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.mk-chat-sq{display:flex;gap:5px;flex-wrap:wrap;padding:6px 12px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.mk-sq-chip{padding:4px 9px;border-radius:12px;font-size:10px;font-weight:500;color:var(--cyan);border:1px solid rgba(0,212,255,.22);cursor:pointer;transition:all .15s;background:transparent}
+.mk-sq-chip:hover{background:rgba(0,212,255,.08)}
+.mk-chat-inp-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--bdr);flex-shrink:0;background:rgba(0,0,0,.2)}
+.mk-chat-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:8px;padding:7px 10px;color:var(--text);font-size:11px;outline:none;font-family:inherit;transition:border-color .2s}
+.mk-chat-inp:focus{border-color:var(--bdr2)}
+.mk-chat-send{width:32px;height:32px;border-radius:8px;background:var(--blue);border:none;color:#fff;font-size:13px;cursor:pointer;flex-shrink:0;transition:all .2s}
+.mk-chat-send:hover{background:#0052CC}
+.mk-typing{display:flex;align-items:center;gap:4px;padding:8px 11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;border-bottom-left-radius:3px;align-self:flex-start;width:fit-content}
+.mk-tdot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:mktd 1.2s ease-in-out infinite}
+.mk-tdot:nth-child(2){animation-delay:.2s}.mk-tdot:nth-child(3){animation-delay:.4s}
+@keyframes mktd{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-4px);opacity:1}}
+
+@keyframes mkflt{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes mke{0%,82%,100%{transform:scaleY(1)}88%{transform:scaleY(.07)}}
+@keyframes mkch{0%,100%{opacity:.65}50%{opacity:1}}
+.mke1{animation:mke 4s ease-in-out infinite;transform-origin:50% 50%}
+.mke2{animation:mke 4s ease-in-out infinite .26s;transform-origin:50% 50%}
+.mkcs{animation:mkch 2s ease-in-out infinite}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){.dash-grid{grid-template-columns:1fr 1fr 240px}.dash-stats{grid-column:1/3}.dash-picks{grid-column:2;grid-row:2}.dash-hmap{grid-row:2}.dash-score{grid-row:3;grid-column:1}.dash-gainers{grid-row:4;grid-column:1/3}.dash-losers{grid-row:4;grid-column:1/3}.dash-news{grid-row:3;grid-column:2}.dash-right{grid-column:3;grid-row:1/5}}
+@media(max-width:900px){.body{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* ══ CHARACTER ENGINE STYLES ══ */
+.mk-char{display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;z-index:10;filter:drop-shadow(0 0 30px rgba(0,100,255,.4));transition:filter .4s}
+.mk-char:hover{filter:drop-shadow(0 0 44px rgba(0,180,255,.6))}
+.mk-ants{display:flex;gap:56px;margin-bottom:-4px;position:relative;z-index:3}
+.mk-ant{display:flex;flex-direction:column;align-items:center}
+.mk-ant-b{width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#60C0FF,#0066FF);box-shadow:0 0 8px rgba(0,180,255,.8);animation:antG 2s ease-in-out infinite;transition:background .6s,box-shadow .6s}
+.mk-ant:last-child .mk-ant-b{animation-delay:-.7s}
+.mk-pulse-up .mk-ant-b{background:linear-gradient(135deg,#6EE7B7,#00D084)!important;box-shadow:0 0 8px rgba(0,208,132,.85)!important}
+.mk-pulse-down .mk-ant-b{background:linear-gradient(135deg,#FCA5A5,#FF4D4F)!important;box-shadow:0 0 8px rgba(255,77,79,.85)!important}
+.mk-ant-p{width:5px;height:20px;background:linear-gradient(to bottom,#5BA0E0,#1A3A8A);border-radius:2px}
+.mk-hp{position:relative;width:158px;height:30px;margin-bottom:-10px;z-index:3}
+.mk-hp-band{position:absolute;left:8px;right:8px;top:0;height:20px;border:0 solid transparent;border-top:9px solid #0A2E8A;border-left:7px solid transparent;border-right:7px solid transparent;border-radius:50% 50% 0 0/100% 100% 0 0}
+.mk-hp-band::after{content:'';position:absolute;left:4px;right:4px;top:-7px;height:12px;border:0 solid transparent;border-top:5px solid #1A5AFF;border-left:5px solid transparent;border-right:5px solid transparent;border-radius:50% 50% 0 0/100% 100% 0 0}
+.mk-hp-cup{position:absolute;bottom:0;width:26px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1A5AFF,#0A2480);box-shadow:inset -2px -2px 5px rgba(0,0,0,.4),0 0 8px rgba(0,100,255,.3)}
+.mk-hp-cup::after{content:'';position:absolute;inset:4px;border-radius:4px;background:radial-gradient(circle at 40% 35%,rgba(100,180,255,.35),rgba(0,20,100,.5))}
+.mk-hp-l{left:0}.mk-hp-r{right:0}
+.mk-head{width:152px;height:142px;border-radius:50% 50% 44% 44%/52% 52% 48% 48%;background:radial-gradient(ellipse at 33% 26%,rgba(255,255,255,.88) 0%,rgba(255,255,255,0) 52%),linear-gradient(155deg,#FFFFFF 0%,#EEF4FF 32%,#C8DEFF 65%,#8ABAFF 100%);position:relative;z-index:4;box-shadow:inset -7px -7px 18px rgba(0,0,80,.12),inset 4px 4px 12px rgba(255,255,255,.65)}
+.mk-head::before{content:'';position:absolute;left:10%;right:10%;bottom:0;height:38%;background:linear-gradient(to top,rgba(80,140,255,.2),transparent);border-radius:0 0 50% 50%}
+.mk-face{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:106px;height:80px;border-radius:14px;background:#000B1E;border:2px solid rgba(0,150,255,.4);box-shadow:0 0 12px rgba(0,100,255,.3),inset 0 0 18px rgba(0,0,40,.8);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.mk-face::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 11px,rgba(0,80,200,.05) 11px,rgba(0,80,200,.05) 12px),repeating-linear-gradient(90deg,transparent,transparent 11px,rgba(0,80,200,.05) 11px,rgba(0,80,200,.05) 12px)}
+.mk-face::after{content:'';position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,rgba(0,180,255,.55),transparent);animation:scan 3.5s linear infinite}
+.mk-eyes{display:flex;gap:18px;align-items:center;position:relative;z-index:2}
+.mk-eye{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#80EEFF 0%,#00D4FF 50%,#007AA0 100%);box-shadow:0 0 10px rgba(0,212,255,.85),0 0 22px rgba(0,180,255,.4);position:relative;animation:eblink 4s ease-in-out infinite;transition:background .4s,box-shadow .4s}
+.mk-eye:last-child{animation-delay:.28s}
+.mk-eye::before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.88);top:3px;left:5px}
+.mk-eye::after{content:'';position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(0,80,140,.55);bottom:5px;right:4px}
+.mk-mouth{position:relative;z-index:2;width:40px;height:11px;overflow:hidden}
+.mk-mc{position:absolute;width:40px;height:22px;border-radius:50%;border:2.5px solid rgba(0,180,255,.6);top:-11px;transition:all .4s}
+.mk-neck{width:28px;height:10px;background:linear-gradient(to bottom,#C8DEFF,#90B8EE);border-radius:0 0 4px 4px;margin-top:-3px;z-index:3;position:relative}
+.mk-bwrap{display:flex;align-items:flex-start;position:relative;z-index:4;margin-top:-2px}
+.mk-arm{width:24px;display:flex;flex-direction:column;align-items:center;padding-top:7px;transition:transform .4s}
+.mk-arm-u{width:18px;height:30px;border-radius:9px;background:linear-gradient(155deg,#E8F2FF,#B0CDFF);box-shadow:inset -2px -2px 5px rgba(0,0,80,.14)}
+.mk-arm-lo{width:16px;height:24px;border-radius:7px;background:linear-gradient(155deg,#D0E4FF,#9ABCEE);margin-top:-2px;box-shadow:inset -1px -1px 4px rgba(0,0,80,.1)}
+.mk-hand{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FFFFFF,#D0E4FF);margin-top:-2px;box-shadow:0 2px 5px rgba(0,0,80,.14)}
+.mk-arm-l{transform-origin:top right}.mk-arm-r{transform-origin:top left}
+.mk-torso{width:100px;background:linear-gradient(155deg,#1A5AFF 0%,#0A2E8A 58%,#051A5E 100%);border-radius:16px 16px 20px 20px;position:relative;box-shadow:inset -4px -4px 11px rgba(0,0,0,.35),inset 3px 3px 9px rgba(80,140,255,.28),0 4px 18px rgba(0,60,200,.4);overflow:hidden}
+.mk-torso-t{height:48px}.mk-torso-b{height:38px;background:linear-gradient(155deg,#0A2E8A,#051A5E);border-top:1px solid rgba(0,180,255,.18)}
+.mk-torso::after{content:'';position:absolute;top:0;left:6px;width:36px;height:55%;background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);border-radius:0 0 50% 50%}
+.mk-chest{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(0,80,200,.4),rgba(0,20,80,.7));border:2px solid rgba(0,180,255,.5);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,180,255,.5);animation:chestP 2.2s ease-in-out infinite}
+.mk-chest-i{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#00D4FF,#0066FF);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;font-family:system-ui}
+.mk-belt{position:absolute;top:46px;left:0;right:0;height:4px;background:linear-gradient(90deg,#040E40,#1A5AFF,#040E40)}
+.mk-buckle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12px;height:7px;background:radial-gradient(circle,#00D4FF,#0066FF);border-radius:2px}
+.mk-legs{display:flex;gap:12px;justify-content:center;position:relative;z-index:4;margin-top:-2px}
+.mk-leg{display:flex;flex-direction:column;align-items:center}
+.mk-hoverring{
+.mk-thigh{width:28px;height:26px;border-radius:4px 4px 0 0;background:linear-gradient(155deg,#1248CC,#0A2480);box-shadow:inset -2px 0 5px rgba(0,0,0,.25)}
+.mk-shin{width:24px;height:24px;border-radius:0 0 4px 4px;background:linear-gradient(155deg,#1A5AFF,#0A2E8A);margin-top:-1px;box-shadow:inset -2px 0 5px rgba(0,0,0,.2)}
+.mk-foot{width:32px;height:11px;border-radius:4px 4px 5px 5px;background:linear-gradient(135deg,#E8F2FF,#B0CDFF);margin-top:-1px;box-shadow:0 3px 7px rgba(0,0,80,.22)}
+.mk-idle .mk-char{animation:mkFloat 3.6s ease-in-out infinite}
+.mk-idle .mk-arm-l{animation:mkWave 2s ease-in-out infinite 2s}
+.mk-think .mk-char{animation:mkTilt .95s ease-in-out infinite}
+.mk-think .mk-arm-r{animation:mkThinkArm 1.8s ease-in-out infinite}
+.mk-analyze .mk-char{animation:mkBreathe 2.2s ease-in-out infinite}
+.mk-analyze .mk-arm-r{animation:mkPoint 2.5s ease-in-out infinite}
+.mk-speak .mk-char{animation:mkBob 1.2s ease-in-out infinite}
+.mk-speak .mk-arm-l{animation:mkGestL 1.8s ease-in-out infinite}
+.mk-speak .mk-arm-r{animation:mkGestR 1.8s ease-in-out infinite .3s}
+.mk-success .mk-char{animation:mkJump .7s ease-in-out 4}
+.mk-success .mk-arm-l{animation:mkVicL .7s ease-in-out 4}
+.mk-success .mk-arm-r{animation:mkVicR .7s ease-in-out 4}
+.mk-alert .mk-char{animation:mkShake .28s ease-in-out infinite}
+.mk-love .mk-char{animation:mkFloat 3s ease-in-out infinite}
+.mk-celebrate .mk-char{animation:mkCelebrate 1.6s ease-in-out 2}
+.mk-celebrate .mk-arm-l{animation:mkVicL 1.6s ease-in-out 2}
+.mk-celebrate .mk-arm-r{animation:mkVicR 1.6s ease-in-out 2 .1s}
+.mk-angry .mk-char{animation:mkAngry .22s ease-in-out infinite}
+.mk-sleep .mk-char{animation:mkSleep 6s ease-in-out infinite}
+.eyes-happy .mk-eye{background:radial-gradient(circle at 34% 30%,#A7F3D0,#10B981,#065F46)!important;box-shadow:0 0 10px rgba(16,185,129,.9),0 0 22px rgba(16,185,129,.4)!important}
+.eyes-think .mk-eye{background:radial-gradient(circle at 34% 30%,#FEF08A,#F59E0B,#92400E)!important;box-shadow:0 0 10px rgba(245,158,11,.9),0 0 22px rgba(245,158,11,.4)!important}
+.eyes-bad  .mk-eye{background:radial-gradient(circle at 34% 30%,#FECACA,#EF4444,#991B1B)!important;box-shadow:0 0 10px rgba(239,68,68,.9),0 0 22px rgba(239,68,68,.4)!important}
+.eyes-love .mk-eye{background:radial-gradient(circle at 34% 30%,#FCA5A5,#EC4899,#9D174D)!important;box-shadow:0 0 10px rgba(236,72,153,.9),0 0 22px rgba(236,72,153,.4)!important}
+.eyes-sleep .mk-eye{height:5px!important;margin-top:10px!important;background:rgba(0,40,100,.5)!important;box-shadow:none!important;animation:none!important}
+.eyes-sleep .mk-eye::before,.eyes-sleep .mk-eye::after{display:none!important}
+.mouth-happy .mk-mc{top:-9px;border-color:rgba(16,185,129,.75)!important}
+.mouth-sad   .mk-mc{top:4px;transform:rotate(180deg);border-color:rgba(239,68,68,.7)!important}
+.mouth-flat  .mk-mc{display:none}
+.mouth-flat .mk-mouth::after{content:'';position:absolute;left:3px;right:3px;top:4px;height:2px;background:rgba(0,150,255,.5);border-radius:2px}
+
+/* ── KEYFRAMES ── */
+@keyframes antG{0%,100%{box-shadow:0 0 8px rgba(0,180,255,.8)}50%{box-shadow:0 0 18px rgba(0,212,255,1)}}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:.7}90%{opacity:.7}100%{top:100%;opacity:0}}
+@keyframes eblink{0%,82%,100%{transform:scaleY(1)}88%{transform:scaleY(.06)}}
+@keyframes chestP{0%,100%{box-shadow:0 0 14px rgba(0,180,255,.5)}50%{box-shadow:0 0 26px rgba(0,212,255,.9)}}
+@keyframes mkFloat   {0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes mkTilt    {0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-7px)}}
+@keyframes mkBreathe {0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.03)}}
+@keyframes mkBob     {0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes mkJump    {0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-34px) scale(1.08)}68%{transform:translateY(-11px) scale(.97)}}
+@keyframes mkShake   {0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+@keyframes mkCelebrate{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-28px) rotate(-13deg)}50%{transform:translateY(-32px) rotate(0)}75%{transform:translateY(-28px) rotate(13deg)}100%{transform:translateY(0) rotate(0)}}
+@keyframes mkAngry   {0%,100%{transform:translateX(0) scale(1)}25%{transform:translateX(-8px) scale(1.02)}75%{transform:translateX(8px) scale(1.02)}}
+@keyframes mkSleep   {0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes mkWave    {0%,100%,50%{transform:rotate(0)}15%{transform:rotate(-40deg)}30%{transform:rotate(-22deg)}45%{transform:rotate(-40deg)}}
+@keyframes mkThinkArm{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(-15deg) translateY(-4px)}}
+@keyframes mkPoint   {0%,100%{transform:rotate(0)}50%{transform:rotate(-28deg) translateY(-5px)}}
+@keyframes mkGestL   {0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+@keyframes mkGestR   {0%,100%{transform:rotate(0)}50%{transform:rotate(17deg)}}
+@keyframes mkVicL    {0%,100%{transform:rotate(0)}40%{transform:rotate(-52deg)}}
+@keyframes mkVicR    {0%,100%{transform:rotate(0)}40%{transform:rotate(52deg)}}
+
+/* ── FLIGHT MODE (Superman pose + forward launch + blue trail) ── */
+.mk-flight .mk-char{animation:mkFlightLaunch 1.8s ease-in forwards}
+.mk-flight .mk-arm-l{animation:mkFlightArm 1.8s ease-in forwards}
+.mk-flight .mk-arm-r{animation:mkFlightArm 1.8s ease-in forwards}
+.mk-flight .mk-legs{animation:mkFlightLegs 1.8s ease-in forwards}
+.mk-flight .mk-hoverring{opacity:0}
+.mk-flight-trail{
+  position:absolute;left:50%;top:50%;width:6px;height:60px;
+  background:linear-gradient(to top,rgba(0,212,255,0),rgba(0,212,255,.85));
+  border-radius:50%;transform:translate(-50%,0) scaleY(0);transform-origin:top center;
+  opacity:0;pointer-events:none;z-index:1;
+  animation:mkTrailGrow 1.8s ease-in forwards;
+}
+.mk-flight .mk-flight-trail{opacity:1}
+@keyframes mkFlightLaunch{
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  30%{transform:translateY(-10px) rotate(-4deg) scale(1.02)}
+  100%{transform:translateY(-340px) rotate(-3deg) scale(.4)}
+}
+@keyframes mkFlightArm{0%{transform:rotate(0)}100%{transform:rotate(-78deg)}}
+@keyframes mkFlightLegs{0%{transform:scaleY(1)}100%{transform:scaleY(.7) translateY(6px)}}
+@keyframes mkTrailGrow{0%{transform:translate(-50%,0) scaleY(0);opacity:0}20%{opacity:1}100%{transform:translate(-50%,0) scaleY(6);opacity:0}}
+
+/* ── THINKING HOLOGRAM PARTICLES ── */
+.mk-think-holo,.mk-analyze .mk-think-holo{
+  position:absolute;inset:-30px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:2;
+}
+.mk-think .mk-think-holo,.mk-analyze .mk-think-holo{opacity:1}
+.mk-holo-dot{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:radial-gradient(circle,#00D4FF,rgba(0,150,255,.2));
+  box-shadow:0 0 8px rgba(0,212,255,.8);
+  animation:holoOrbit 3s linear infinite;
+}
+.mk-holo-dot:nth-child(1){top:10%;left:50%;animation-delay:0s}
+.mk-holo-dot:nth-child(2){top:50%;left:90%;animation-delay:-1s}
+.mk-holo-dot:nth-child(3){top:85%;left:30%;animation-delay:-2s}
+@keyframes holoOrbit{
+  0%{transform:rotate(0deg) translateX(40px) rotate(0deg);opacity:.3}
+  50%{opacity:1}
+  100%{transform:rotate(360deg) translateX(40px) rotate(-360deg);opacity:.3}
+}
+
+/* ── ENGINE WRAPPER (self-contained — no dependency on page-level styles) ── */
+.mk-state-root{display:inline-flex;flex-direction:column;align-items:center;position:relative}
+.mk-speech-wrap{position:absolute;top:-10px;right:-10px;transform:translateX(60%);z-index:30;animation:mkSpeechBob 3.2s ease-in-out infinite}
+.mk-speech{background:rgba(12,10,40,.96);border:1px solid rgba(0,212,255,.3);border-radius:12px 12px 12px 0;padding:9px 14px;font-size:12px;font-weight:600;color:#66E0FF;white-space:nowrap;max-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s}
+@keyframes mkSpeechBob{0%,100%{transform:translateX(60%) translateY(0)}50%{transform:translateX(60%) translateY(-6px)}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="15" fill="#0A1842" stroke="#0066FF" stroke-width="1.5"/>
+      <rect x="7" y="10" width="18" height="14" rx="4.5" fill="#001433"/>
+      <circle cx="12" cy="17" r="3" fill="#00D4FF"/><circle cx="13.4" cy="15.3" r="1" fill="rgba(255,255,255,.82)"/>
+      <circle cx="20" cy="17" r="3" fill="#00D4FF"/><circle cx="21.4" cy="15.3" r="1" fill="rgba(255,255,255,.82)"/>
+      <path d="M10 22 Q16 26 22 22" fill="none" stroke="rgba(0,180,255,.6)" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="9" y="8" width="14" height="5" rx="2" fill="#1A5AFF"/>
+      <circle cx="16" cy="10.5" r="1.5" fill="#00D4FF"/>
+    </svg>
+    MARKETO <span class="ai">AI™</span>
+  </a>
+
+  <div class="srchwrap">
+    <span class="srch-ico">🔍</span>
+    <form autocomplete="off" onsubmit="return false" style="margin:0">
+      <input type="text" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabindex="-1" autocomplete="off">
+      <input class="srchinp" id="sInp" name="mk_q_7731x" placeholder="Search: INFY, RELIANCE, HDFCBANK..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" role="combobox" aria-autocomplete="list">
+    </form>
+    <div class="srch-drop" id="sDrop"></div>
+  </div>
+
+  <div class="top-r">
+    <div class="bell"><span>🔔</span><div class="bell-dot"></div></div>
+    <button class="btn btn-orange" onclick="openBroker()">🔗 Link Trading App</button>
+    <div style="display:flex;align-items:center;gap:5px"><div class="avt">PD</div><span style="font-size:11px;font-weight:600">Pradeep</span></div>
+  </div>
+</header>
+
+<!-- ══ HORIZONTAL STOCK TICKER ══ -->
+<div class="hticker">
+  <div class="hticker-lbl">📈 LIVE STOCKS</div>
+  <div class="hticker-track">
+    <div class="hticker-inner" id="hTicker"></div>
+  </div>
+</div>
+
+<!-- ══ BODY ══ -->
+<div class="body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <svg viewBox="0 0 22 22" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="10" fill="#0A1842" stroke="#0066FF" stroke-width="1.5"/><circle cx="8" cy="12" r="2.2" fill="#00D4FF"/><circle cx="14" cy="12" r="2.2" fill="#00D4FF"/></svg>
+      <span class="sb-brand-name">MARKETO <span>AI™</span></span>
+    </div>
+    <div class="sbnav">
+      <div class="sg">Main</div>
+      <a class="sl on" onclick="goPage('dash',this)"><span class="sl-ic">🏠</span>Dashboard</a>
+      <a class="sl" onclick="goPage('market',this)"><span class="sl-ic">📊</span>Market Overview</a>
+      <a class="sl" onclick="goPage('stocks',this)"><span class="sl-ic">📝</span>All Stocks</a>
+      <a class="sl" onclick="goPage('technical',this)"><span class="sl-ic">📉</span>Technical</a>
+      <div class="sg">Personal</div>
+      <a class="sl" href="portfolio.html"><span class="sl-ic">💼</span>Portfolio<span class="stag tag-r">−2.8%</span></a>
+      <a class="sl" onclick="goPage('watchlist',this)"><span class="sl-ic">📋</span>Watchlist</a>
+      <div class="sg">AI Tools</div>
+      <a class="sl" href="brain.html"><span class="sl-ic">🧠</span>Marketo Brain™<span class="stag tag-c">New</span></a>
+      <a class="sl" href="screener.html"><span class="sl-ic">🔥</span>Screeners</a>
+      <div class="sg">Markets</div>
+      <a class="sl" onclick="goPage('global',this)"><span class="sl-ic">🌐</span>Global</a>
+      <a class="sl" href="crypto.html"><span class="sl-ic">₿</span>Crypto</a>
+      <a class="sl" onclick="goPage('news',this)"><span class="sl-ic">📰</span>News<span class="stag tag-o">Live</span></a>
+      <div class="sdiv"></div>
+      <div class="sact" onclick="openBroker()"><span>🔗</span>Link Trading App</div>
+      <a class="sl" href="index.html"><span class="sl-ic">⚙️</span>Settings</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TABS -->
+    <div class="tabs" id="tabs">
+      <div class="tab on" data-p="dash">🏠 Dashboard</div>
+      <div class="tab" data-p="market">📊 Market</div>
+      <div class="tab" data-p="news">📰 News</div>
+      <div class="tab" data-p="technical">📉 Technical</div>
+      <div class="tab" data-p="global">🌐 Global</div>
+      <div class="tab" data-p="stocks">📝 Stocks</div>
+      <div class="tab" data-p="watchlist">📋 Watchlist</div>
+    </div>
+
+    <!-- ════ DASHBOARD PAGE ════ -->
+    <div class="page on" id="pg-dash">
+      <div class="dash-grid">
+
+        <!-- ── STAT CARDS: Nifty50 | Bank Nifty | VIX | PCR ── -->
+        <div class="dash-stats">
+          <div class="stat s-ok">
+            <div class="stat-l">Nifty 50</div>
+            <div class="stat-v" style="color:var(--ok)">24,853</div>
+            <div class="stat-c" style="color:var(--ok)">▲ +188 &nbsp;+0.76%</div>
+          </div>
+          <div class="stat s-bad">
+            <div class="stat-l">Bank Nifty</div>
+            <div class="stat-v" style="color:var(--bad)">52,741</div>
+            <div class="stat-c" style="color:var(--bad)">▼ −144 &nbsp;−0.27%</div>
+          </div>
+          <div class="stat s-warn">
+            <div class="stat-l">India VIX</div>
+            <div class="stat-v" style="color:var(--warn)">14.82</div>
+            <div class="stat-c" style="color:var(--bad)">▼ −2.8%</div>
+          </div>
+          <div class="stat s-cyan">
+            <div class="stat-l">PCR 100</div>
+            <div class="stat-v" style="color:var(--ok)">1.24</div>
+            <div class="stat-c" style="color:var(--ok)">▲ Bullish</div>
+          </div>
+        </div>
+
+        <!-- ── RIGHT: NEWS CHANNEL LIVE STREAMING ── -->
+        <div class="dash-right">
+          <div class="cnbc-section" style="flex:1">
+            <div class="cnbc-hd">
+              <div class="cnbc-hd-t"><span class="ldot"></span>News Channel Live Streaming</div>
+              <div class="live-pill"><div class="live-d"></div>LIVE</div>
+            </div>
+            <!-- Channel selector tabs -->
+            <div class="ch-tabs" id="chTabs"></div>
+            <!-- Player -->
+            <div class="ch-player-wrap">
+              <div id="chPlaceholder" class="ch-placeholder">
+                <div class="ch-logo" id="chLogo"></div>
+                <div class="ch-pname" id="chPname"></div>
+                <div class="ch-pdesc" id="chPdesc">Paste a YouTube link below to watch live</div>
+              </div>
+              <div id="chFrame" class="ch-iframe"></div>
+            </div>
+            <!-- Volume controls -->
+            <div class="ch-vol-row" id="chVolRow">
+              <button class="ch-vol-btn" id="chMuteBtn" onclick="toggleMute()" title="Mute / Unmute">🔊</button>
+              <input type="range" class="ch-vol-slider" id="chVolSlider" min="0" max="100" value="80" oninput="setVol(this.value)">
+              <span class="ch-vol-pct" id="chVolPct">80%</span>
+            </div>
+            <!-- Paste URL -->
+            <div class="ch-paste-row">
+              <input class="ch-url-inp" id="chInp" placeholder="Paste YouTube URL and press ▶ Play (or Enter)">
+              <button class="ch-play-btn" id="chPlayBtn" onclick="playChannel()">▶ Play</button>
+              <button class="ch-clear-btn" onclick="clearChannel()">✕</button>
+            </div>
+            <!-- External links -->
+            <div class="ch-links" id="chLinks"></div>
+          </div>
+        </div>
+
+        <!-- ── SECTOR HEATMAP ── -->
+        <div class="gc dash-hmap">
+          <div class="gc-t">Sector Heat Map <span class="chip chip-g">▲ Open</span></div>
+          <div class="hmap" id="hmap"></div>
+        </div>
+
+        <!-- ── MARKETO SCORE DONUT ── -->
+        <div class="gc dash-score">
+          <div class="gc-t">MARKETO SCORE™ <span class="chip chip-c">72</span></div>
+          <div class="donut-wrap">
+            <div class="donut-rel">
+              <svg width="100" height="100" viewBox="0 0 100 100" style="filter:drop-shadow(0 0 10px rgba(0,180,255,.35))">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
+                <circle cx="50" cy="50" r="38" fill="none" stroke="url(#sg)" stroke-width="9"
+                  stroke-dasharray="171 68" stroke-dashoffset="60" stroke-linecap="round"/>
+                <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00D4FF"/><stop offset="100%" stop-color="#0066FF"/>
+                </linearGradient></defs>
+                <circle cx="50" cy="50" r="28" fill="rgba(0,100,255,.08)"/>
+              </svg>
+              <div class="donut-num">72</div>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:var(--cyan)">Moderately Bullish</div>
+          </div>
+          <div style="margin-top:6px;flex:1">
+            <div class="sbr"><span class="sbl">QGLP</span><div class="sbw"><div class="sbf" style="width:78%;background:#00D4FF"></div></div><span class="sbv" style="color:#00D4FF">78</span></div>
+            <div class="sbr"><span class="sbl">Momentum</span><div class="sbw"><div class="sbf" style="width:65%;background:#00D084"></div></div><span class="sbv" style="color:#00D084">65</span></div>
+            <div class="sbr"><span class="sbl">Valuation</span><div class="sbw"><div class="sbf" style="width:55%;background:#FFB020"></div></div><span class="sbv" style="color:#FFB020">55</span></div>
+            <div class="sbr"><span class="sbl">Technical</span><div class="sbw"><div class="sbf" style="width:82%;background:#00D4FF"></div></div><span class="sbv" style="color:#00D4FF">82</span></div>
+            <div class="sbr"><span class="sbl">FII Flow</span><div class="sbw"><div class="sbf" style="width:74%;background:#00D084"></div></div><span class="sbv" style="color:#00D084">74</span></div>
+          </div>
+        </div>
+
+        <!-- ── AI STOCK PICKS ── -->
+        <div class="gc dash-picks">
+          <div class="gc-t">⚡ AI Stock Picks <span class="chip chip-g">New</span></div>
+          <div id="aiPicks" style="flex:1"></div>
+          <a href="screener.html" class="btn btn-blue" style="width:100%;justify-content:center;margin-top:6px;font-size:10px">View All →</a>
+        </div>
+
+        <!-- ── TOP GAINERS ── -->
+        <div class="gc dash-gainers">
+          <div class="gc-t">📈 Top Gainers</div>
+          <table class="tbl" id="tGain"></table>
+        </div>
+
+        <!-- ── TOP LOSERS ── -->
+        <div class="gc dash-losers">
+          <div class="gc-t">📉 Top Losers</div>
+          <table class="tbl" id="tLoss"></table>
+        </div>
+
+        <!-- ── NEWS BULLETS ── -->
+        <div class="gc dash-news">
+          <div class="gc-t">📌 News Bullets <span class="ldot"></span></div>
+          <div id="newsBullets" style="flex:1;overflow-y:auto"></div>
+        </div>
+
+      </div><!-- /dash-grid -->
+    </div><!-- /pg-dash -->
+
+    <!-- ════ MARKET PAGE ════ -->
+    <div class="page" id="pg-market">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:12px">📊 Market Overview</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+        <div class="stat s-ok"><div class="stat-l">Nifty 50</div><div class="stat-v" style="color:var(--ok)">24,853</div><div class="stat-c" style="color:var(--ok)">▲ +0.76%</div></div>
+        <div class="stat s-ok"><div class="stat-l">Sensex</div><div class="stat-v" style="color:var(--ok)">81,942</div><div class="stat-c" style="color:var(--ok)">▲ +0.75%</div></div>
+        <div class="stat s-bad"><div class="stat-l">Midcap 150</div><div class="stat-v" style="color:var(--text)">52,340</div><div class="stat-c" style="color:var(--bad)">▼ −0.12%</div></div>
+        <div class="stat s-ok"><div class="stat-l">Small Cap</div><div class="stat-v" style="color:var(--ok)">18,620</div><div class="stat-c" style="color:var(--ok)">▲ +0.44%</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="gc"><div class="gc-t">Sector Heatmap</div><div class="hmap" id="hmap2"></div></div>
+        <div class="gc"><div class="gc-t">Market Breadth</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;justify-content:space-between;padding:9px;border-radius:7px;background:rgba(0,208,132,.08);border:1px solid rgba(0,208,132,.2)"><span style="color:var(--ok);font-weight:700">▲ Advances</span><span style="font-size:18px;font-weight:800;color:var(--ok)">1,284</span></div>
+            <div style="display:flex;justify-content:space-between;padding:9px;border-radius:7px;background:rgba(255,77,79,.08);border:1px solid rgba(255,77,79,.2)"><span style="color:var(--bad);font-weight:700">▼ Declines</span><span style="font-size:18px;font-weight:800;color:var(--bad)">842</span></div>
+            <div style="display:flex;justify-content:space-between;padding:9px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--bdr)"><span style="color:var(--muted);font-weight:700">— Unchanged</span><span style="font-size:18px;font-weight:800;color:var(--muted)">124</span></div>
+            <div style="display:flex;justify-content:space-between;padding:9px;border-radius:7px;background:rgba(0,212,255,.05);border:1px solid var(--bdr2)"><span style="color:var(--cyan);font-weight:700">⬆ 52W Highs</span><span style="font-size:18px;font-weight:800;color:var(--cyan)">48</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ NEWS PAGE ════ -->
+    <div class="page" id="pg-news">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">📰 Market News <span class="ldot"></span><span style="font-size:11px;color:var(--ok)">Live</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="newsGrid"></div>
+    </div>
+
+    <!-- ════ TECHNICAL PAGE ════ -->
+    <div class="page" id="pg-technical">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:12px">📉 Technical Analysis</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+        <div class="stat s-ok"><div class="stat-l">RSI (Nifty)</div><div class="stat-v" style="color:var(--ok)">58.4</div><div class="stat-c" style="color:var(--ok)">Bullish</div></div>
+        <div class="stat s-ok"><div class="stat-l">MACD</div><div class="stat-v" style="color:var(--ok)">Bullish</div><div class="stat-c" style="color:var(--ok)">Above Signal</div></div>
+        <div class="stat s-ok"><div class="stat-l">PCR</div><div class="stat-v" style="color:var(--ok)">1.24</div><div class="stat-c" style="color:var(--ok)">&gt;1 Bullish</div></div>
+        <div class="stat s-warn"><div class="stat-l">VIX</div><div class="stat-v" style="color:var(--warn)">14.82</div><div class="stat-c" style="color:var(--ok)">Low Fear</div></div>
+      </div>
+      <div class="gc"><div class="gc-t">Technical Signals</div>
+        <table class="tbl"><thead><tr><th>Stock</th><th>RSI</th><th>MACD</th><th>EMA20</th><th>EMA50</th><th>Status</th><th>Signal</th></tr></thead><tbody>
+          <tr><td><div class="sn">ITC</div></td><td style="color:var(--ok)">58</td><td style="color:var(--ok)">Bullish</td><td>₹281</td><td>₹270</td><td><span class="chip chip-g">Above Both</span></td><td><span class="sig sig-b">BUY</span></td></tr>
+          <tr><td><div class="sn">SBILIFE</div></td><td style="color:var(--ok)">62</td><td style="color:var(--ok)">Bullish</td><td>₹1,650</td><td>₹1,580</td><td><span class="chip chip-g">Above Both</span></td><td><span class="sig sig-b">BUY</span></td></tr>
+          <tr><td><div class="sn">TCS</div></td><td style="color:var(--ok)">60</td><td style="color:var(--ok)">Bullish</td><td>₹3,480</td><td>₹3,320</td><td><span class="chip chip-g">Above Both</span></td><td><span class="sig sig-h">HOLD</span></td></tr>
+          <tr><td><div class="sn">HDFCBANK</div></td><td style="color:var(--warn)">44</td><td style="color:var(--bad)">Bearish</td><td>₹820</td><td>₹855</td><td><span class="chip chip-b">Below Both</span></td><td><span class="sig sig-h">HOLD</span></td></tr>
+          <tr><td><div class="sn">OLAELEC</div></td><td style="color:var(--bad)">28</td><td style="color:var(--bad)">Bearish</td><td>₹52</td><td>₹68</td><td><span class="chip chip-b">Below Both</span></td><td><span class="sig sig-e">EXIT</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ GLOBAL PAGE ════ -->
+    <div class="page" id="pg-global">
+      <div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:12px">🌐 Global Markets</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+        <div class="stat s-ok"><div class="stat-l">S&P 500</div><div class="stat-v" style="color:var(--ok)">5,842</div><div class="stat-c" style="color:var(--ok)">▲ +0.42%</div></div>
+        <div class="stat s-ok"><div class="stat-l">NASDAQ</div><div class="stat-v" style="color:var(--ok)">18,240</div><div class="stat-c" style="color:var(--ok)">▲ +0.68%</div></div>
+        <div class="stat s-bad"><div class="stat-l">Nikkei 225</div><div class="stat-v" style="color:var(--bad)">38,420</div><div class="stat-c" style="color:var(--bad)">▼ −0.34%</div></div>
+        <div class="stat s-ok"><div class="stat-l">Hang Seng</div><div class="stat-v" style="color:var(--ok)">18,842</div><div class="stat-c" style="color:var(--ok)">▲ +1.24%</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div class="stat s-warn"><div class="stat-l">Gold ₹/10g</div><div class="stat-v" style="color:var(--warn)">₹94,250</div><div class="stat-c" style="color:var(--ok)">▲ +0.5%</div></div>
+        <div class="stat s-bad"><div class="stat-l">Crude Brent</div><div class="stat-v" style="color:var(--text)">$82.4</div><div class="stat-c" style="color:var(--bad)">▼ −0.8%</div></div>
+        <div class="stat s-cyan"><div class="stat-l">USD/INR</div><div class="stat-v" style="color:var(--text)">₹83.52</div><div class="stat-c" style="color:var(--ok)">Stable</div></div>
+      </div>
+    </div>
+
+    <!-- ════ STOCKS PAGE ════ -->
+    <div class="page" id="pg-stocks">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-family:var(--fd);font-size:18px;font-weight:700">📝 All Stocks</div><a href="screener.html" class="btn btn-blue">Advanced Screener →</a></div>
+      <div class="gc"><table class="tbl"><thead><tr><th>Stock</th><th>Sector</th><th>CMP</th><th>Change</th><th>PE</th><th>Signal</th></tr></thead><tbody id="stocksBody"></tbody></table></div>
+    </div>
+
+    <!-- ════ WATCHLIST PAGE ════ -->
+    <div class="page" id="pg-watchlist">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-family:var(--fd);font-size:18px;font-weight:700">📋 Watchlist</div><a href="brain.html" class="btn btn-blue">🧠 AI Analyze</a></div>
+      <div class="gc"><table class="tbl"><thead><tr><th>Stock</th><th>CMP</th><th>Change</th><th>Target</th><th>Notes</th></tr></thead><tbody>
+        <tr><td><div class="sn">ITC</div><div class="ss">FMCG</div></td><td style="font-weight:700">₹285</td><td style="color:var(--ok);font-weight:700">+1.8%</td><td><span class="chip chip-g">₹300</span></td><td style="color:var(--muted);font-size:10px">SMILE — Hotels spin</td></tr>
+        <tr><td><div class="sn">POLYCAB</div><div class="ss">Cables</div></td><td style="font-weight:700">₹4,620</td><td style="color:var(--ok);font-weight:700">+0.8%</td><td><span class="chip chip-g">₹5,000</span></td><td style="color:var(--muted);font-size:10px">Infra theme</td></tr>
+        <tr><td><div class="sn">HDFCBANK</div><div class="ss">Banking</div></td><td style="font-weight:700">₹772</td><td style="color:var(--bad);font-weight:700">−0.3%</td><td><span class="chip chip-w">₹900</span></td><td style="color:var(--muted);font-size:10px">Watch ₹760 support</td></tr>
+      </tbody></table></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /body -->
+</div><!-- /shell -->
+
+<!-- ══ BROKER MODAL ══ -->
+<div class="mbg" id="brokerModal" onclick="if(event.target===this)closeBroker()">
+  <div class="modal">
+    <button class="modal-x" onclick="closeBroker()">✕</button>
+    <div class="modal-t">🔗 Link Your Trading Account</div>
+    <div class="modal-s">Connect your broker for live portfolio sync, real-time P&L and one-click orders inside MARKETO AI™.</div>
+    <div class="broker-g">
+      <div class="bkr" onclick="connectBroker('Zerodha','https://zerodha.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#387ED1,#2B6CB0);font-size:18px;font-weight:900">Z</div><div class="bkr-name">Zerodha</div><div class="bkr-type">Discount</div></div>
+      <div class="bkr" onclick="connectBroker('Upstox','https://upstox.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#6C3EC7,#4A2C9A);font-size:18px;font-weight:900">U</div><div class="bkr-name">Upstox</div><div class="bkr-type">Discount</div></div>
+      <div class="bkr" onclick="connectBroker('Angel One','https://angelone.in')"><div class="bkr-logo" style="background:linear-gradient(135deg,#D32F2F,#9A1B1B);font-size:18px;font-weight:900">A</div><div class="bkr-name">Angel One</div><div class="bkr-type">Full Service</div></div>
+      <div class="bkr" onclick="connectBroker('Sharekhan','https://sharekhan.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#0E4D92,#083672);font-size:14px;font-weight:900">SK</div><div class="bkr-name">Sharekhan</div><div class="bkr-type">Full Service</div></div>
+      <div class="bkr" onclick="connectBroker('Groww','https://groww.in')"><div class="bkr-logo" style="background:linear-gradient(135deg,#00C9A7,#009B80);font-size:18px;font-weight:900">G</div><div class="bkr-name">Groww</div><div class="bkr-type">Discount</div></div>
+      <div class="bkr" onclick="connectBroker('Fyers','https://fyers.in')"><div class="bkr-logo" style="background:linear-gradient(135deg,#1565C0,#0D47A1);font-size:18px;font-weight:900">F</div><div class="bkr-name">Fyers</div><div class="bkr-type">Discount</div></div>
+      <div class="bkr" onclick="connectBroker('IIFL','https://iiflsecurities.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#FF8F00,#E65100);font-size:14px;font-weight:900">II</div><div class="bkr-name">IIFL</div><div class="bkr-type">Full Service</div></div>
+      <div class="bkr" onclick="connectBroker('Kotak','https://kotaksecurities.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#C62828,#880E0E);font-size:14px;font-weight:900">KS</div><div class="bkr-name">Kotak</div><div class="bkr-type">Full Service</div></div>
+      <div class="bkr" onclick="connectBroker('5paisa','https://5paisa.com')"><div class="bkr-logo" style="background:linear-gradient(135deg,#1565C0,#0D3E80);font-size:13px;font-weight:900">5P</div><div class="bkr-name">5paisa</div><div class="bkr-type">Discount</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STOCK RESEARCH PANEL ══ -->
+<div class="rsch-bg" id="rschBg" onclick="if(event.target===this)closeResearch()">
+  <div class="rsch-modal">
+    <div class="rsch-hd">
+      <div class="rsch-hd-icon" id="rschIcon">📊</div>
+      <div>
+        <div class="rsch-hd-t" id="rschTitle">Stock Research</div>
+        <div class="rsch-hd-s" id="rschSub">MARKETO BRAIN™ Analysis</div>
+      </div>
+      <button class="rsch-close" onclick="closeResearch()">✕</button>
+    </div>
+    <div class="rsch-body" id="rschBody"></div>
+  </div>
+</div>
+
+<!-- ══ MARKETO AGENT ══ -->
+<div class="mk-float">
+  <!-- Real interactive chat panel -->
+  <div class="mk-chat-panel" id="mkChatPanel">
+    <div class="mk-chat-hd">
+      <div class="mk-chat-av">🤖</div>
+      <div>
+        <div class="mk-chat-hd-t">MARKETO AI™</div>
+        <div class="mk-chat-hd-s"><span class="mk-chat-hd-dot"></span>Online · All engines active</div>
+      </div>
+      <button class="mk-chat-x" onclick="closeMkChat()">✕</button>
+    </div>
+    <div class="mk-chat-body" id="mkChatBody"></div>
+    <div class="mk-chat-sq" id="mkChatSq"></div>
+    <div class="mk-chat-inp-row">
+      <input class="mk-chat-inp" id="mkChatInp" name="mk_chat_8842z" placeholder="Ask about any stock or the market..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" onkeydown="if(event.key==='Enter')sendMkChat()">
+      <button class="mk-chat-send" onclick="sendMkChat()">➤</button>
+    </div>
+  </div>
+  <div class="mk-bubble" id="mkBubble">Namaste Pradeep! Markets bullish today 📈</div>
+  <div id="mk-dashboard-float-mount" onclick="toggleMk()" style="cursor:pointer" title="MARKETO AI"></div>
+</div>
+
+<script>
+/* ══ CHARACTER ENGINE ══ */
+/* ════════════════════════════════════════════════════════════════
+   MARKETO CHARACTER ENGINE
+   ════════════════════════════════════════════════════════════════
+   One central component that renders and controls every MARKETO
+   character instance across the platform (landing page, dashboard,
+   portfolio, watchlist, brain, loading screens, captain mode).
+
+   ARCHITECTURE — built for a future asset swap with zero call-site
+   changes:
+
+     CharacterEngine.mount(containerId, options)
+         -> renders a character instance into the given container
+         -> returns an instance handle with .setState(), .speak(), etc.
+
+     Internally, rendering is delegated to a RENDERER. Today the
+     renderer is CSS_RENDERER (builds the existing hand-built CSS/HTML
+     character). Later, when a real MARKETO asset exists (PNG, WebP,
+     or a 3D .glb model), a new renderer can be implemented with the
+     same four methods and swapped in by changing ONE line --
+     CharacterEngine.activeRenderer -- without touching any page that
+     calls CharacterEngine.mount(). Every page in the platform should
+     only ever call the public CharacterEngine API below, never reach
+     into renderer internals directly.
+
+   USAGE (any page):
+     <div id="marketo-hero"></div>
+     <script src="js/character-engine.js"></script>
+     <script>
+       const marketo = CharacterEngine.mount('marketo-hero', {
+         size: 1,
+         initialState: 'idle',
+         clickToCycle: true,
+         showHoverRing: true
+       });
+       marketo.setState('success');
+       marketo.speak('SBILIFE up +143%! 🎉');
+     </script>
+   ════════════════════════════════════════════════════════════════ */
+
+(function(global){
+  'use strict';
+
+  /* ── STATE DEFINITIONS ──
+     Single source of truth for every expression state across the
+     whole platform. Adding a new state here makes it available to
+     every page automatically. */
+  const STATES = {
+    idle:      { cls:'mk-idle',      eyeC:'',            mouthC:'',            torsoC:'' },
+    think:     { cls:'mk-think',     eyeC:'eyes-think',  mouthC:'',            torsoC:'' },
+    analyze:   { cls:'mk-analyze',   eyeC:'eyes-think',  mouthC:'',            torsoC:'' },
+    speak:     { cls:'mk-speak',     eyeC:'',            mouthC:'mouth-happy', torsoC:'' },
+    success:   { cls:'mk-success',   eyeC:'eyes-happy',  mouthC:'mouth-happy', torsoC:'' },
+    alert:     { cls:'mk-alert',     eyeC:'eyes-bad',     mouthC:'mouth-sad',   torsoC:'' },
+    love:      { cls:'mk-love',      eyeC:'eyes-love',   mouthC:'mouth-happy', torsoC:'' },
+    celebrate: { cls:'mk-celebrate', eyeC:'eyes-happy',  mouthC:'mouth-happy', torsoC:'' },
+    angry:     { cls:'mk-angry',     eyeC:'eyes-bad',     mouthC:'mouth-sad',   torsoC:'' },
+    sleep:     { cls:'mk-sleep',     eyeC:'eyes-sleep',  mouthC:'mouth-flat',  torsoC:'' },
+    flight:    { cls:'mk-flight',    eyeC:'',            mouthC:'',            torsoC:'' },
+  };
+  const ALL_STATE_CLASSES = Object.values(STATES).map(function(s){return s.cls;});
+
+  let uidCounter = 0;
+  function nextUid(){ return 'mke' + (++uidCounter); }
+
+  /* ── CSS RENDERER (current implementation) ──
+     Builds the hand-crafted CSS/HTML MARKETO character. This is the
+     ONLY place that knows the actual DOM structure of the CSS
+     character -- if/when a sprite or 3D renderer is added, it lives
+     in its own object below this one, and CharacterEngine.mount()
+     just picks whichever renderer is active. */
+  const CSS_RENDERER = {
+    render: function(container, uid, opts){
+      const scale = opts.size || 1;
+      const initState = STATES[opts.initialState || 'idle'];
+      container.innerHTML =
+        '<div class="mk-state-root ' + initState.cls + '" id="' + uid + '-state" style="transform:scale(' + scale + ')">' +
+          '<div class="mk-char" id="' + uid + '-char"' + (opts.clickToCycle ? ' onclick="CharacterEngine._handleClick(\'' + uid + '\')"' : '') + '>' +
+            '<div class="mk-ants">' +
+              '<div class="mk-ant"><div class="mk-ant-b"></div><div class="mk-ant-p"></div></div>' +
+              '<div class="mk-ant"><div class="mk-ant-b"></div><div class="mk-ant-p"></div></div>' +
+            '</div>' +
+            '<div class="mk-hp">' +
+              '<div class="mk-hp-band"></div>' +
+              '<div class="mk-hp-cup mk-hp-l"></div>' +
+              '<div class="mk-hp-cup mk-hp-r"></div>' +
+            '</div>' +
+            '<div class="mk-head">' +
+              '<div class="mk-face">' +
+                '<div class="mk-eyes" id="' + uid + '-eyes"><div class="mk-eye"></div><div class="mk-eye"></div></div>' +
+                '<div class="mk-mouth" id="' + uid + '-mouth"><div class="mk-mc"></div></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="mk-neck"></div>' +
+            '<div class="mk-bwrap" id="' + uid + '-bwrap">' +
+              '<div class="mk-arm mk-arm-l"><div class="mk-arm-u"></div><div class="mk-arm-lo"></div><div class="mk-hand"></div></div>' +
+              '<div class="mk-torso" id="' + uid + '-torso">' +
+                '<div class="mk-torso-t"><div class="mk-chest"><div class="mk-chest-i">M</div></div></div>' +
+                '<div class="mk-torso-b"><div class="mk-belt"><div class="mk-buckle"></div></div></div>' +
+              '</div>' +
+              '<div class="mk-arm mk-arm-r"><div class="mk-arm-u"></div><div class="mk-arm-lo"></div><div class="mk-hand"></div></div>' +
+            '</div>' +
+            '<div class="mk-legs">' +
+              '<div class="mk-leg"><div class="mk-thigh"></div><div class="mk-shin"></div><div class="mk-foot"></div></div>' +
+              '<div class="mk-leg"><div class="mk-thigh"></div><div class="mk-shin"></div><div class="mk-foot"></div></div>' +
+            '</div>' +
+            (opts.showHoverRing !== false ? '<div class="mk-hoverring"></div>' : '') +
+            '<div class="mk-think-holo"><div class="mk-holo-dot"></div><div class="mk-holo-dot"></div><div class="mk-holo-dot"></div></div>' +
+            '<div class="mk-flight-trail"></div>' +
+          '</div>' +
+          (opts.showSpeechBubble ? '<div class="mk-speech-wrap"><div class="mk-speech" id="' + uid + '-speech"></div></div>' : '') +
+        '</div>';
+    },
+    applyState: function(uid, stateName){
+      const s = STATES[stateName] || STATES.idle;
+      const root = document.getElementById(uid+'-state');
+      if(!root) return;
+      ALL_STATE_CLASSES.forEach(function(c){ root.classList.remove(c); });
+      root.classList.add(s.cls);
+      const eyes = document.getElementById(uid+'-eyes');
+      if(eyes){ eyes.className='mk-eyes'; if(s.eyeC) eyes.classList.add(s.eyeC); }
+      const mouth = document.getElementById(uid+'-mouth');
+      if(mouth){ mouth.className='mk-mouth'; if(s.mouthC) mouth.classList.add(s.mouthC); }
+      const bwrap = document.getElementById(uid+'-bwrap');
+      if(bwrap){ bwrap.className='mk-bwrap'; if(s.torsoC) bwrap.classList.add(s.torsoC); }
+    },
+    speak: function(uid, text){
+      const el = document.getElementById(uid+'-speech');
+      if(!el) return;
+      el.style.opacity = '0';
+      setTimeout(function(){ el.textContent = text; el.style.opacity = '1'; }, 200);
+    },
+    setMarketPulse: function(uid, up){
+      const charEl = document.getElementById(uid+'-char');
+      if(!charEl) return;
+      charEl.classList.remove('mk-pulse-up','mk-pulse-down');
+      charEl.classList.add(up ? 'mk-pulse-up' : 'mk-pulse-down');
+    }
+  };
+
+  /* ── FUTURE RENDERER STUB ──
+     When a real generated MARKETO asset (PNG/WebP/GLB) is ready,
+     implement this object with the same four methods (render,
+     applyState, speak, setMarketPulse) and flip
+     CharacterEngine.activeRenderer to 'asset'. No page-level code
+     needs to change -- every page calls the same public API. */
+  const ASSET_RENDERER = {
+    render: function(container, uid, opts){
+      console.warn('ASSET_RENDERER not yet implemented -- falling back to CSS_RENDERER. Drop in the generated MARKETO asset and implement this renderer to switch over.');
+      CSS_RENDERER.render(container, uid, opts);
+    },
+    applyState: function(uid, stateName){ CSS_RENDERER.applyState(uid, stateName); },
+    speak: function(uid, text){ CSS_RENDERER.speak(uid, text); },
+    setMarketPulse: function(uid, up){ CSS_RENDERER.setMarketPulse(uid, up); }
+  };
+
+  const RENDERERS = { css: CSS_RENDERER, asset: ASSET_RENDERER };
+
+  /* ── PUBLIC ENGINE API ── */
+  const instances = {};
+  const clickHandlers = {};
+
+  const CharacterEngine = {
+    /* Change this single value to 'asset' once a real renderer is
+       implemented. Every mounted instance picks it up automatically. */
+    activeRenderer: 'css',
+    _lastClick: 0,
+
+    mount: function(containerId, options){
+      options = options || {};
+      const container = document.getElementById(containerId);
+      if(!container){
+        console.error('CharacterEngine.mount: no element with id', containerId);
+        return null;
+      }
+      const uid = nextUid();
+      const renderer = RENDERERS[this.activeRenderer] || CSS_RENDERER;
+      renderer.render(container, uid, options);
+
+      const instance = {
+        uid: uid,
+        containerId: containerId,
+        currentState: options.initialState || 'idle',
+        setState: function(stateName){
+          if(!STATES[stateName]){ console.warn('Unknown MARKETO state:', stateName); return; }
+          this.currentState = stateName;
+          renderer.applyState(uid, stateName);
+        },
+        speak: function(text){ renderer.speak(uid, text); },
+        setMarketPulse: function(up){ renderer.setMarketPulse(uid, up); },
+        cycleDemo: function(order){
+          clickHandlers[uid] = { order: order || ['idle','success','think','alert','sleep'], i:0 };
+        }
+      };
+      if(options.cycleOrder) instance.cycleDemo(options.cycleOrder);
+      instances[uid] = instance;
+      return instance;
+    },
+
+    getInstance: function(uid){ return instances[uid]; },
+
+    /* Internal -- called by the onclick handler the CSS renderer wires up */
+    _handleClick: function(uid){
+      const inst = instances[uid];
+      const cycle = clickHandlers[uid];
+      if(!inst) return;
+      if(!cycle){ return; }
+      const now = Date.now();
+      if(this._lastClick && now - this._lastClick < 500) return;
+      this._lastClick = now;
+      cycle.i = (cycle.i + 1) % cycle.order.length;
+      inst.setState(cycle.order[cycle.i]);
+    },
+
+    /* Convenience: sync antenna market-pulse color across every mounted
+       instance on the page at once, given live up/down direction. */
+    syncAllMarketPulse: function(isUp){
+      Object.keys(instances).forEach(function(uid){ instances[uid].setMarketPulse(isUp); });
+    },
+
+    listStates: function(){ return Object.keys(STATES); }
+  };
+
+  global.CharacterEngine = CharacterEngine;
+
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+/* ── Mount the floating MARKETO instance once the page loads ── */
+let mkFloatChar=null;
+function mountDashboardCharacter(){
+  if(document.getElementById('mk-dashboard-float-mount')){
+    mkFloatChar = CharacterEngine.mount('mk-dashboard-float-mount', {
+      size: 0.42, initialState: 'idle', showHoverRing: false
+    });
+  }
+}
+mountDashboardCharacter();
+</script>
+
+<script>
+/* ══ DATA ══ */
+const SDATA=[
+  {n:'SBILIFE',s:'Insurance',p:'₹1,706',c:'+3.1%',u:true},{n:'ITC',s:'FMCG',p:'₹285',c:'+1.8%',u:true},
+  {n:'HYUNDAI',s:'Auto',p:'₹1,990',c:'+2.4%',u:true},{n:'TCS',s:'IT',p:'₹3,541',c:'+0.8%',u:true},
+  {n:'WIPRO',s:'IT',p:'₹180',c:'+1.1%',u:true},{n:'ICICIGI',s:'Insurance',p:'₹1,695',c:'+0.6%',u:true},
+  {n:'POLYCAB',s:'Cables',p:'₹4,620',c:'+0.8%',u:true},{n:'INFY',s:'IT',p:'₹1,842',c:'+0.5%',u:true},
+  {n:'SHRIRAMFIN',s:'Finance',p:'₹2,080',c:'+1.2%',u:true},{n:'MARUTI',s:'Auto',p:'₹12,420',c:'+0.3%',u:true},
+  {n:'OLAELEC',s:'EV',p:'₹45.74',c:'−4.1%',u:false},{n:'KLIFESTYL',s:'Lifestyle',p:'₹18',c:'−3.2%',u:false},
+  {n:'TATASTEEL',s:'Metals',p:'₹142',c:'−0.9%',u:false},{n:'RELIANCE',s:'Oil&Gas',p:'₹1,293',c:'−0.8%',u:false},
+  {n:'HDFCBANK',s:'Banking',p:'₹772',c:'−0.3%',u:false},{n:'YESBANK',s:'Banking',p:'₹22',c:'−2.2%',u:false},
+  {n:'SUNPHARMA',s:'Pharma',p:'₹1,820',c:'+0.4%',u:true},{n:'BAJFINANCE',s:'Finance',p:'₹6,840',c:'+1.4%',u:true},
+  {n:'SIEMENS',s:'CapGoods',p:'₹6,240',c:'+0.5%',u:true},{n:'KOTAK',s:'Banking',p:'₹1,742',c:'+0.8%',u:true},
+];
+
+/* ══ SEARCH ══ */
+const sI=document.getElementById('sInp'),sD=document.getElementById('sDrop');
+sI.addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  if(!q){sD.classList.remove('open');return;}
+  const m=SDATA.filter(s=>s.n.toLowerCase().includes(q)||s.s.toLowerCase().includes(q)).slice(0,6);
+  let rows=m.map(s=>`<div class="sri" onclick="pickStock('${s.n}','${s.p}','${s.c}')"><div><div class="sri-n">${s.n}</div><div class="sri-s">${s.s}</div><div class="sri-research" onclick="event.stopPropagation();openResearch('${s.n}')">🔬 Full Research</div></div><div><div class="sri-p">${s.p}</div><div class="sri-c" style="color:${s.u?'var(--ok)':'var(--bad)'}">${s.c}</div></div></div>`).join('');
+  /* Always offer to research the raw typed query too, even if it matches nothing in the portfolio/watchlist data */
+  const rawName=this.value.trim().toUpperCase();
+  if(rawName){
+    rows+=`<div class="sri" style="background:rgba(0,212,255,.05)" onclick="openResearch('${rawName.replace(/'/g,"\\'")}')"><div><div class="sri-n">Research "${rawName}"</div><div class="sri-s">Not in your watchlist? Get a full MARKETO BRAIN™ report anyway</div></div><div style="color:var(--cyan);font-size:16px">🔬</div></div>`;
+  }
+  sD.innerHTML=rows;
+  sD.classList.add('open');
+});
+sI.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){sD.classList.remove('open');sI.blur();}
+  if(e.key==='Enter'){
+    const v=this.value.trim();
+    if(v){ openResearch(v.toUpperCase()); sD.classList.remove('open'); }
+  }
+});
+sI.addEventListener('blur',()=>setTimeout(()=>sD.classList.remove('open'),220));
+function pickStock(n,p,c){sI.value=n;sD.classList.remove('open');mkSay(`${n} @ ${p} (${c}) — click 🔬 Research for the full AI report!`);}
+
+/* ══ HORIZONTAL TICKER ══ */
+(function(){
+  const inner=document.getElementById('hTicker');if(!inner)return;
+  const stocks=[...SDATA,...SDATA,...SDATA];
+  inner.innerHTML=stocks.map(s=>`
+    <div class="hti" onclick="pickStock('${s.n}','${s.p}','${s.c}')">
+      <span class="hti-name">${s.n}</span>
+      <span class="hti-price">${s.p}</span>
+      <span class="hti-arr" style="color:${s.u?'var(--ok)':'var(--bad)'}">${s.u?'▲':'▼'}</span>
+      <span class="hti-chg" style="color:${s.u?'var(--ok)':'var(--bad)'}">${s.c}</span>
+    </div>`).join('');
+  /* Pause on hover */
+  inner.addEventListener('mouseenter',()=>inner.classList.add('paused'));
+  inner.addEventListener('mouseleave',()=>inner.classList.remove('paused'));
+})();
+
+/* ══ PAGE SWITCHING ══ */
+function goPage(name,sideEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  const pg=document.getElementById('pg-'+name);if(pg)pg.classList.add('on');
+  document.querySelectorAll('.sl').forEach(l=>l.classList.remove('on'));
+  if(sideEl)sideEl.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.p===name));
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>goPage(t.dataset.p,null)));
+
+/* ══ BROKER ══ */
+function openBroker(){document.getElementById('brokerModal').classList.add('open')}
+function closeBroker(){document.getElementById('brokerModal').classList.remove('open')}
+function connectBroker(name,url){closeBroker();mkSay(`Opening ${name}...`);setTimeout(()=>window.open(url,'_blank'),600);}
+
+/* ══ MARKETO AGENT ══ */
+const MK_MSGS=['Namaste Pradeep! Markets bullish today 📈','FII bought ₹3,842 Cr — bullish signal!','SBILIFE up +143% — book some profits?','Nifty PCR 1.24 — bulls in control!','VIX 14.82 — low fear, great for longs!','Open Marketo Brain™ for AI analysis 🧠'];
+let mkI=0,mkVis=false;
+function mkSay(txt){const b=document.getElementById('mkBubble');b.textContent=txt;b.style.display='block';mkVis=true;clearTimeout(window._mkt);window._mkt=setTimeout(()=>{b.style.display='none';mkVis=false;},5500);}
+
+/* ── Real floating chat — lightweight knowledge base ── */
+const MK_KB={
+  greeting:"Namaste Pradeep! 🙏 I'm MARKETO AI. Ask me about any stock, the market, or your portfolio — or open Marketo Brain™ for the full research platform.",
+  sbilife:"**SBILIFE** @ ₹1,706 (+3.1%)\nVNB margin 28%, ROE 15.8%, PE 72x — quality but expensive. 🟡 HOLD, book partial profits above ₹1,800. Open Marketo Brain™ for the full QGLP breakdown.",
+  hdfcbank:"**HDFCBANK** @ ₹772 (−0.3%)\nGNPA 1.2% (excellent), but NIM compressing and trading below the 200 EMA. 🟡 Accumulate near ₹750-760 support. Full technical view in Marketo Brain™.",
+  nifty:"**Nifty 50** @ 24,853 (+0.76%)\nPCR 1.24, VIX 14.82, FII net buyers +₹3,842 Cr — broadly bullish setup. Support 24,400, resistance 25,200.",
+  itc:"**ITC** @ ₹285 (+1.8%)\nSMILE framework all green — Hotels spin-off catalyst, PE 28x, dividend yield 3.2%. 🟢 BUY, target ₹340 in 12 months.",
+  portfolio:"Your portfolio is at ₹7,78,765 vs ₹8,01,212 invested (−2.80%). SBILIFE and ICICIGI are your best performers; HDFCBANK is dragging. Check the Risk Radar in Marketo Brain™ for a full breakdown.",
+  default:"Good question! For deep analysis — fundamentals, charts, screener, risk — open **Marketo Brain™** from the sidebar. I can give you a quick read here: try asking about a specific stock like SBILIFE, HDFCBANK, ITC, or about Nifty / your portfolio."
+};
+function getMkChatReply(q){
+  const l=q.toLowerCase();
+  if(l.includes('sbilife')||l.includes('sbi life'))return MK_KB.sbilife;
+  if(l.includes('hdfcbank')||l.includes('hdfc bank'))return MK_KB.hdfcbank;
+  if(l.includes('itc'))return MK_KB.itc;
+  if(l.includes('nifty')&&!l.includes('bank'))return MK_KB.nifty;
+  if(l.includes('portfolio')||l.includes('my stocks'))return MK_KB.portfolio;
+  if(l.includes('hi')||l.includes('hello')||l.includes('namaste'))return MK_KB.greeting;
+  return MK_KB.default;
+}
+const MK_SQS=['Analyze SBILIFE','HDFCBANK view','Is Nifty bullish?','My portfolio health'];
+let mkChatStarted=false;
+
+function addMkChatMsg(txt,role){
+  const body=document.getElementById('mkChatBody');
+  const d=document.createElement('div');
+  d.className='mk-cmsg '+role;
+  d.innerHTML=txt.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  body.appendChild(d);
+  body.scrollTop=body.scrollHeight;
+}
+function showMkTyping(){
+  const body=document.getElementById('mkChatBody');
+  const t=document.createElement('div');t.className='mk-typing';t.id='mkTyping';
+  t.innerHTML='<div class="mk-tdot"></div><div class="mk-tdot"></div><div class="mk-tdot"></div>';
+  body.appendChild(t);body.scrollTop=body.scrollHeight;
+}
+function removeMkTyping(){const t=document.getElementById('mkTyping');if(t)t.remove();}
+
+function sendMkChat(q){
+  const inp=document.getElementById('mkChatInp');
+  const txt=(q||inp.value).trim();if(!txt)return;
+  addMkChatMsg(txt,'user');inp.value='';
+  showMkTyping();
+  setTimeout(()=>{removeMkTyping();addMkChatMsg(getMkChatReply(txt),'bot');},600+Math.random()*500);
+}
+
+function openMkChat(){
+  document.getElementById('mkChatPanel').classList.add('open');
+  const b=document.getElementById('mkBubble');if(b){b.style.display='none';mkVis=false;}
+  if(!mkChatStarted){
+    mkChatStarted=true;
+    document.getElementById('mkChatSq').innerHTML=MK_SQS.map(q=>`<div class="mk-sq-chip" onclick="sendMkChat('${q}')">${q}</div>`).join('');
+    setTimeout(()=>addMkChatMsg(MK_KB.greeting,'bot'),250);
+  }
+  document.getElementById('mkChatInp').focus();
+}
+function closeMkChat(){document.getElementById('mkChatPanel').classList.remove('open');}
+function toggleMk(){
+  const panel=document.getElementById('mkChatPanel');
+  if(panel.classList.contains('open')) closeMkChat(); else openMkChat();
+}
+setTimeout(()=>mkSay('Namaste Pradeep! All systems online 🚀'),3000);
+
+/* ══════════════════════════════
+   STOCK RESEARCH PANEL
+   Works for ANY stock typed — portfolio holding or not.
+══════════════════════════════ */
+const RESEARCH_DB={
+  SBILIFE:{name:'SBI Life Insurance',sector:'Insurance',founded:'2000',ceo:'Amit Jhingran',scores:{quality:9,growth:8,profit:8,mgmt:8,moat:8,tech:7,risk:3},overall:82,
+    verdict:{icon:'🟢',title:'High-Quality Compounder',sub:'SBI parentage with industry-leading VNB margins — quality at a full price.'},
+    business:'Earns via new business premium and renewal premium across protection, savings and pension products, distributed through SBI\'s vast bank branch network plus its own agency force.',
+    financials:[['Revenue Growth','+24.8% YoY'],['VNB Margin','28.2%'],['ROE','15.8%'],['PE Ratio','72x'],['Promoter Holding','55.4%']],
+    catalysts:['Rising insurance penetration in India (still under 4% of GDP)','SBI bank branch cross-sell reach','Product mix shift toward higher-margin protection plans'],
+    moat:'Strong distribution moat via SBI\'s 22,000+ branch network, plus brand trust built over two decades.',
+    risk:'Valuation risk — trades at a premium PE versus peers; any growth slowdown could compress the multiple sharply.',
+    gurus:[['Buffett Engine','Strong brand, durable distribution moat','Buyable'],['QGLP (Raamdeo)','Quality and growth clear, price stretched','Good business, wait for dip'],['SMILE (Kedia)','Past the small-cap stage, now a steady compounder','Moderately attractive']]},
+  HDFCBANK:{name:'HDFC Bank',sector:'Banking',founded:'1994',ceo:'Sashidhar Jagdishan',scores:{quality:8,growth:6,profit:7,mgmt:8,moat:8,tech:5,risk:4},overall:72,
+    verdict:{icon:'🟡',title:'Quality Bank, Near-Term Headwinds',sub:'Best-in-class asset quality, but margin compression and merger integration weigh on the stock.'},
+    business:'India\'s largest private bank by assets, earning through net interest income on loans/deposits plus fee income from cards, wealth management and transaction banking.',
+    financials:[['GNPA','1.2%'],['NIM','3.4% (compressing)'],['ROE','16.2%'],['PE Ratio','18x'],['CASA Ratio','38%']],
+    catalysts:['Post-merger cost synergies materializing over FY27','Branch expansion into semi-urban/rural markets','Digital banking platform scaling'],
+    moat:'Brand trust, low-cost CASA deposit franchise, and one of the widest branch networks among private banks.',
+    risk:'NIM compression and CASA ratio decline post-HDFC merger remain the key overhangs until fully digested.',
+    gurus:[['Buffett Engine','Durable franchise, temporarily depressed returns','Buyable on weakness'],['QGLP (Raamdeo)','Quality strong, growth re-rating pending recovery','Accumulate gradually'],['Technical View','Below 200 EMA, weak momentum','Wait for trend confirmation']]},
+  ITC:{name:'ITC Limited',sector:'FMCG / Diversified',founded:'1910',ceo:'Sanjiv Puri',scores:{quality:9,growth:7,profit:9,mgmt:9,moat:9,tech:7,risk:2},overall:84,
+    verdict:{icon:'🟢',title:'High-Quality Compounder',sub:'Diversified cash machine with a hotels demerger catalyst on the horizon.'},
+    business:'Diversified conglomerate spanning cigarettes (high-margin cash generator), FMCG foods, hotels, paperboards, and agri-business.',
+    financials:[['Revenue Growth','+14% YoY'],['ROE','28%'],['PE Ratio','28x'],['Dividend Yield','3.2%'],['Promoter Holding','— (widely held)']],
+    catalysts:['Hotels business demerger unlocking value','FMCG segment scaling toward profitability','Agri-tech and exports expansion'],
+    moat:'Dominant cigarette market share with high pricing power, plus a trusted FMCG brand portfolio.',
+    risk:'Regulatory and taxation risk on tobacco remains the single largest overhang on the stock.',
+    gurus:[['Buffett Engine','Pricing power, high ROE, founder-grade management','Buyable'],['SMILE (Kedia)','Large aspiration via hotels unlock, large TAM','Attractive'],['Technical View','Above key moving averages, steady uptrend','Bullish']]},
+};
+
+/* Generic fallback used for ANY stock not in our database — still produces
+   a complete, clearly-labeled framework rather than failing or making up specific numbers. */
+function buildGenericReport(name){
+  return{
+    name:name,sector:'Unclassified — Add to watchlist to refine',founded:'—',ceo:'—',
+    scores:{quality:6,growth:6,profit:6,mgmt:6,moat:5,tech:5,risk:5},overall:55,
+    verdict:{icon:'🟡',title:'Not Yet in MARKETO Database',sub:'We don\'t have verified fundamentals for this stock yet — here\'s the research framework MARKETO would apply.'},
+    business:'Specific business-model details aren\'t available in this build. Once you add this stock to your portfolio or watchlist, MARKETO can pull its filings, financials, and segment data automatically.',
+    financials:[['Revenue Growth','Not available — connect data source'],['ROE','Not available'],['PE Ratio','Not available'],['Promoter Holding','Not available'],['Dividend Yield','Not available']],
+    catalysts:['Add this stock to your Watchlist so MARKETO can begin tracking news, filings and price action','Check the AI Screener™ in Marketo Brain™ to see if it matches any of your saved filters','Use Financial Analyzer™ once data is linked to pull P&L, Balance Sheet and Ratios'],
+    moat:'Moat assessment requires fundamental data this build doesn\'t yet have for this specific stock.',
+    risk:'Unverified — treat any analysis of this stock as directional only until real financials are connected.',
+    gurus:[['Buffett Engine','Insufficient data to score moat/ROE','Needs more data'],['QGLP (Raamdeo)','Cannot assess Quality/Growth/Longevity/Price without financials','Needs more data'],['Technical View','No price history loaded for this symbol','Needs more data']],
+    isGeneric:true
+  };
+}
+
+function getResearchData(rawName){
+  const key=rawName.trim().toUpperCase().replace(/\s+/g,'');
+  if(RESEARCH_DB[key]) return RESEARCH_DB[key];
+  return buildGenericReport(rawName.trim().toUpperCase());
+}
+
+function scoreColor(v){return v>=7?'var(--ok)':v>=4?'var(--warn)':'var(--bad)';}
+
+function openResearch(rawName){
+  if(!rawName||!rawName.trim())return;
+  document.getElementById('rschBg').classList.add('open');
+  const body=document.getElementById('rschBody');
+  body.innerHTML=`<div class="rsch-loading"><div class="rsch-spinner"></div>Running MARKETO BRAIN™ analysis…</div>`;
+  document.getElementById('rschTitle').textContent=rawName.trim().toUpperCase();
+  document.getElementById('rschSub').textContent='Running all 7 engines…';
+
+  setTimeout(()=>renderResearch(rawName),650+Math.random()*400);
+}
+function closeResearch(){document.getElementById('rschBg').classList.remove('open');}
+
+function renderResearch(rawName){
+  const d=getResearchData(rawName);
+  document.getElementById('rschTitle').textContent=d.name;
+  document.getElementById('rschSub').textContent=d.isGeneric?'Generic framework — limited data available':`${d.sector} · MARKETO BRAIN™ Full Analysis`;
+  document.getElementById('rschIcon').textContent=d.isGeneric?'❓':'📊';
+
+  const s=d.scores;
+  const verdictBg=d.verdict.icon==='🟢'?'rgba(0,208,132,.08)':d.verdict.icon==='🟡'?'rgba(255,176,32,.08)':'rgba(255,77,79,.08)';
+  const verdictBdr=d.verdict.icon==='🟢'?'rgba(0,208,132,.25)':d.verdict.icon==='🟡'?'rgba(255,176,32,.25)':'rgba(255,77,79,.25)';
+  const verdictColor=d.verdict.icon==='🟢'?'var(--ok)':d.verdict.icon==='🟡'?'var(--warn)':'var(--bad)';
+
+  document.getElementById('rschBody').innerHTML=`
+    <div class="rsch-score-row">
+      <div class="rsch-score-card"><div class="rsch-score-v" style="color:${scoreColor(s.quality)}">${s.quality}/10</div><div class="rsch-score-l">Quality</div></div>
+      <div class="rsch-score-card"><div class="rsch-score-v" style="color:${scoreColor(s.growth)}">${s.growth}/10</div><div class="rsch-score-l">Growth</div></div>
+      <div class="rsch-score-card"><div class="rsch-score-v" style="color:${scoreColor(s.moat)}">${s.moat}/10</div><div class="rsch-score-l">Moat</div></div>
+      <div class="rsch-score-card"><div class="rsch-score-v" style="color:${scoreColor(10-s.risk)}">${s.risk}/10</div><div class="rsch-score-l">Risk</div></div>
+    </div>
+
+    <div class="rsch-verdict" style="background:${verdictBg};border:1px solid ${verdictBdr}">
+      <div class="rsch-verdict-icon">${d.verdict.icon}</div>
+      <div><div class="rsch-verdict-t" style="color:${verdictColor}">${d.verdict.title}</div><div class="rsch-verdict-s">${d.verdict.sub}</div></div>
+      <div style="margin-left:auto;text-align:right"><div style="font-size:20px;font-weight:800;font-family:var(--fd);color:${verdictColor}">${d.overall}</div><div style="font-size:8px;color:var(--muted)">MARKETO SCORE</div></div>
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">🏢 Business Model</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.7">${d.business}</div>
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">💰 Key Financials</div>
+      ${d.financials.map(f=>`<div class="rsch-fact"><span class="rsch-fact-l">${f[0]}</span><span class="rsch-fact-v">${f[1]}</span></div>`).join('')}
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">🚀 Growth Catalysts</div>
+      ${d.catalysts.map(c=>`<div class="rsch-list-item"><span class="rsch-list-dot">•</span>${c}</div>`).join('')}
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">🏰 Moat Assessment</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.7">${d.moat}</div>
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">⚠️ Key Risk</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.7">${d.risk}</div>
+    </div>
+
+    <div class="rsch-section">
+      <div class="rsch-section-t">👑 Multi-Guru Read</div>
+      ${d.gurus.map(g=>{
+        const vc=g[2].toLowerCase().includes('buy')||g[2].toLowerCase().includes('attractive')?'background:rgba(0,208,132,.12);color:var(--ok)':g[2].toLowerCase().includes('needs')?'background:rgba(255,176,32,.12);color:var(--warn)':'background:rgba(0,212,255,.12);color:var(--cyan)';
+        return`<div class="rsch-guru-card"><div class="rsch-guru-name">${g[0]}</div><div style="font-size:11px;color:var(--muted);margin-bottom:5px">${g[1]}</div><span class="rsch-guru-verdict" style="${vc}">${g[2]}</span></div>`;
+      }).join('')}
+    </div>
+
+    <div class="rsch-cta">
+      <div style="font-size:11px;color:var(--text2)">Want the full institutional-grade report — peer comparison, DCF valuation, shareholding trends, and bull/bear scenarios?</div>
+      <button class="rsch-cta-btn" onclick="closeResearch();window.location.href='brain.html'">🧠 Open Marketo Brain™</button>
+    </div>
+  `;
+}
+
+/* ══ HEATMAP ══ */
+const SECS=[
+  {n:'Insurance',c:'+3.24%',bg:'rgba(0,208,132,.22)',tc:'#00D084',s:'SBILIFE'},
+  {n:'IT',c:'+1.82%',bg:'rgba(0,208,132,.15)',tc:'#00D084',s:'TCS'},
+  {n:'FMCG',c:'+0.94%',bg:'rgba(0,208,132,.1)',tc:'rgba(0,208,132,.9)',s:'ITC'},
+  {n:'Auto',c:'+0.62%',bg:'rgba(0,208,132,.07)',tc:'rgba(0,208,132,.75)',s:'MARUTI'},
+  {n:'Pharma',c:'−0.18%',bg:'rgba(255,176,32,.08)',tc:'rgba(255,176,32,.9)',s:'SUN'},
+  {n:'Metals',c:'−0.84%',bg:'rgba(255,77,79,.12)',tc:'var(--bad)',s:'TATA'},
+  {n:'Banking',c:'−0.27%',bg:'rgba(255,77,79,.08)',tc:'rgba(255,77,79,.85)',s:'HDFC'},
+  {n:'EV',c:'−3.82%',bg:'rgba(255,77,79,.25)',tc:'var(--bad)',s:'OLA'},
+];
+function buildHmap(id){const el=document.getElementById(id);if(!el)return;el.innerHTML=SECS.map(s=>`<div class="hm" style="background:${s.bg}"><div class="hm-n" style="color:${s.tc}">${s.n}</div><div class="hm-v" style="color:${s.tc}">${s.c}</div><div class="hm-s" style="color:${s.tc}">${s.s}</div></div>`).join('');}
+buildHmap('hmap');buildHmap('hmap2');
+
+/* ══ GAINERS / LOSERS ══ */
+const GAINS=SDATA.filter(s=>s.u).slice(0,5);
+const LOSS=SDATA.filter(s=>!s.u).slice(0,5);
+function mkT(data,up){return`<thead><tr><th>Stock</th><th>Sector</th><th>Price</th><th>Change</th></tr></thead><tbody>`+data.map(r=>`<tr><td><div class="sn">${r.n}</div></td><td><div class="ss">${r.s}</div></td><td style="font-weight:700">${r.p}</td><td style="color:${up?'var(--ok)':'var(--bad)'};font-weight:700">${up?'▲':'▼'} ${r.c}</td></tr>`).join('')+'</tbody>';}
+document.getElementById('tGain').innerHTML=mkT(GAINS,true);
+document.getElementById('tLoss').innerHTML=mkT(LOSS,false);
+
+/* ══ AI PICKS ══ */
+const PICKS=[
+  {n:'ITC',w:'SMILE: FMCG + Hotels spin',sc:84,bg:'linear-gradient(135deg,#065F46,#10B981)'},
+  {n:'JBMA',w:'EV bus govt TAM massive',sc:79,bg:'linear-gradient(135deg,#1D4ED8,#3B82F6)'},
+  {n:'MCX',w:'Commodity exchange GARP',sc:76,bg:'linear-gradient(135deg,#D97706,#F59E0B)'},
+  {n:'POLYCAB',w:'Infra cables strong orders',sc:74,bg:'linear-gradient(135deg,#6D28D9,#A855F7)'},
+];
+document.getElementById('aiPicks').innerHTML=PICKS.map(p=>`<div class="pick"><div class="pav" style="background:${p.bg}">${p.n.slice(0,2)}</div><div><div class="pn">${p.n}</div><div class="pw">${p.w}</div></div><div class="psc"><div class="psn">${p.sc}</div><div class="psl">Score</div></div></div>`).join('');
+
+/* ══ NEWS BULLETS ══ */
+const NBULLETS=[
+  {tag:'Market',tc:'#00D4FF',bg:'rgba(0,100,255,.15)',txt:'FII buys ₹3,842 Cr — biggest June 2026 inflow'},
+  {tag:'Insurance',tc:'#00D084',bg:'rgba(0,208,132,.15)',txt:'SBILIFE VNB margins hit record 28% YoY'},
+  {tag:'RBI',tc:'#FFB020',bg:'rgba(255,176,32,.15)',txt:'RBI holds repo at 6.5%, monitors inflation'},
+  {tag:'IT',tc:'#818CF8',bg:'rgba(99,102,241,.15)',txt:'TCS wins $500M European banking deal'},
+  {tag:'EV',tc:'#FF4D4F',bg:'rgba(255,77,79,.15)',txt:'Ola Electric down 4% on Ather competition'},
+  {tag:'Budget',tc:'#FFB020',bg:'rgba(255,176,32,.15)',txt:'Govt: ₹2.4L Cr infra spend — roads, rail'},
+  {tag:'Pharma',tc:'#00D084',bg:'rgba(0,208,132,.15)',txt:'Sun Pharma USFDA approval — $800M US market'},
+];
+document.getElementById('newsBullets').innerHTML=NBULLETS.map(n=>`
+  <div class="news-bullet">
+    <div class="nb-dot" style="background:${n.tc}"></div>
+    <div><div class="nb-tag" style="background:${n.bg};color:${n.tc}">${n.tag}</div><div class="nb-txt">${n.txt}</div></div>
+  </div>`).join('');
+
+/* ══ NEWS PAGE ══ */
+const NEWS=[
+  {tag:'Market',tc:'#00D4FF',bg:'rgba(0,100,255,.12)',src:'ET Markets',time:'2m',h:'FII pumps ₹3,842 Cr into Indian equities — biggest June 2026 single-day inflow',w:'Bullish'},
+  {tag:'Insurance',tc:'#00D084',bg:'rgba(0,208,132,.12)',src:'Moneycontrol',time:'8m',h:'SBILIFE VNB margins hit 28%, new business premium +25% YoY',w:'Bullish'},
+  {tag:'EV',tc:'#FF4D4F',bg:'rgba(255,77,79,.12)',src:'Bloomberg',time:'15m',h:'Ola Electric falls 4% as Ather intensifies competition in premium segment',w:'Bearish'},
+  {tag:'Budget',tc:'#FFB020',bg:'rgba(255,176,32,.12)',src:'Business Standard',time:'22m',h:'Govt announces ₹2.4L Cr infra spend — roads, rail, ports to benefit',w:'Bullish'},
+  {tag:'RBI',tc:'#00D4FF',bg:'rgba(0,212,255,.1)',src:'Mint',time:'35m',h:'RBI holds repo rate at 6.5%, shifts focus to liquidity management',w:'Neutral'},
+  {tag:'IT',tc:'#818CF8',bg:'rgba(99,102,241,.1)',src:'Economic Times',time:'42m',h:'TCS wins $500M deal from European bank — ramp-up from Q3 FY27',w:'Bullish'},
+  {tag:'Banking',tc:'#FFB020',bg:'rgba(255,176,32,.1)',src:'CNBC TV18',time:'1h',h:'HDFCBANK GNPA falls to 1.2%, asset quality improves significantly',w:'Neutral'},
+  {tag:'Pharma',tc:'#00D084',bg:'rgba(0,208,132,.1)',src:'Reuters',time:'1.5h',h:'Sun Pharma gets USFDA nod — opens $800M US dermatology market',w:'Bullish'},
+];
+const wc={Bullish:'var(--ok)',Bearish:'var(--bad)',Neutral:'var(--warn)'};
+document.getElementById('newsGrid').innerHTML=NEWS.map(n=>`<div class="gc" style="cursor:pointer"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;background:${n.bg};color:${n.tc};margin-bottom:4px">${n.tag}</span><div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:4px">${n.h}</div><div style="font-size:10px;color:var(--muted)"><span style="font-weight:600;color:${n.tc}">${n.src}</span> · ${n.time} ago · <span style="color:${wc[n.w]}">${n.w}</span></div></div>`).join('');
+
+/* ══ STOCKS TABLE ══ */
+const STKS=[{n:'TCS',s:'IT',p:'₹3,541',c:'+0.8%',pe:'30x',u:true,sig:'HOLD'},{n:'SBILIFE',s:'Insurance',p:'₹1,706',c:'+3.1%',pe:'72x',u:true,sig:'HOLD'},{n:'ITC',s:'FMCG',p:'₹285',c:'+1.8%',pe:'28x',u:true,sig:'BUY'},{n:'ICICIGI',s:'Insurance',p:'₹1,695',c:'+0.6%',pe:'38x',u:true,sig:'HOLD'},{n:'WIPRO',s:'IT',p:'₹180',c:'+1.1%',pe:'26x',u:true,sig:'HOLD'},{n:'HYUNDAI',s:'Auto',p:'₹1,990',c:'+2.4%',pe:'22x',u:true,sig:'BUY'},{n:'POLYCAB',s:'Cables',p:'₹4,620',c:'+0.8%',pe:'34x',u:true,sig:'BUY'},{n:'HDFCBANK',s:'Banking',p:'₹772',c:'−0.3%',pe:'18x',u:false,sig:'HOLD'},{n:'RELIANCE',s:'Oil&Gas',p:'₹1,293',c:'−0.8%',pe:'24x',u:false,sig:'HOLD'},{n:'OLAELEC',s:'EV',p:'₹45.74',c:'−4.1%',pe:'N/A',u:false,sig:'EXIT'}];
+document.getElementById('stocksBody').innerHTML=STKS.map(s=>{const sc=s.sig==='BUY'?'sig-b':s.sig==='EXIT'?'sig-e':'sig-h';return`<tr><td><div class="sn">${s.n}</div></td><td><div class="ss">${s.s}</div></td><td style="font-weight:700">${s.p}</td><td style="color:${s.u?'var(--ok)':'var(--bad)'};font-weight:700">${s.u?'▲':'▼'} ${s.c}</td><td style="color:var(--muted)">${s.pe}</td><td><span class="sig ${sc}">${s.sig}</span></td></tr>`;}).join('');
+
+/* ══ CHANNEL PLAYER (YouTube embed with paste URL) ══ */
+const CHANNELS=[
+  {id:'cnbc',name:'CNBC Awaaz',   logo:'linear-gradient(135deg,#CC2200,#FF3300)',ic:'CNBC',desc:"CNBC Awaaz — Live Hindi Business News, NSE/BSE Markets",btn:'#CC2200',yt:'https://www.youtube.com/live/NR-DrzMHsXU?si=JIB0AB7yERwe0RI7',web:'https://www.cnbctv18.com/live-tv',   liveId:'NR-DrzMHsXU',liveUrl:'https://www.youtube.com/@cnbcawaazlive/live'},
+  {id:'et',  name:'ET Now',       logo:'linear-gradient(135deg,#D35400,#E67E22)',ic:'ET',  desc:'Economic Times Live — Stock analysis, corporate news', btn:'#D35400',yt:'https://www.youtube.com/live/l90DgWlbrBQ?si=zXmWk76krKJsNVYs',web:'https://economictimes.indiatimes.com',liveId:'l90DgWlbrBQ',liveUrl:'https://www.youtube.com/@ETNOWlive/live'},
+  {id:'ndtv',name:'NDTV Profit',  logo:'linear-gradient(135deg,#1565C0,#1976D2)',ic:'NDTV',desc:'Business 24x7 — Markets, IPOs, mutual funds, economy',  btn:'#1565C0',yt:'https://www.youtube.com/live/i_8aSvFl2b8?si=SWFGEwhHArtACjPl',web:'https://www.ndtvprofit.com',      liveId:'i_8aSvFl2b8',liveUrl:'https://www.youtube.com/@NDTVProfitIndia/live'},
+  {id:'bq',  name:'BQ Prime',     logo:'linear-gradient(135deg,#1B2A4A,#3355AA)',ic:'BQ',  desc:'Bloomberg Quint — Deep analysis, global intelligence', btn:'#2E4A7E',yt:'https://www.youtube.com/@BloombergQuintLive/live',web:'https://www.bqprime.com',                       liveId:null,liveUrl:'https://www.youtube.com/@BloombergQuintLive/live'},
+  {id:'yf',  name:'Yahoo Finance',logo:'linear-gradient(135deg,#6001D2,#7B01F5)',ic:'Y!',  desc:'Global stocks, crypto, forex, earnings & data',       btn:'#6001D2',yt:'https://finance.yahoo.com',web:'https://finance.yahoo.com',                                                liveId:null,liveUrl:'https://finance.yahoo.com'},
+  {id:'rt',  name:'Reuters TV',   logo:'linear-gradient(135deg,#CC0000,#AA0000)',ic:'R',   desc:'International finance & geopolitical analysis',        btn:'#CC0000',yt:'https://www.reuters.com',web:'https://www.reuters.com',                                                   liveId:null,liveUrl:'https://www.reuters.com'},
+];
+
+let curCh=0;
+let ytPlayer=null;          /* YT.Player instance, reused/swapped across channels */
+let ytApiReady=false;
+let pendingVideoId=null;    /* videoId to load once API becomes ready */
+let lastVolume=80;
+let isMuted=false;
+
+/* ── Extract an 11-char YouTube video ID from any common URL shape ── */
+function extractVideoId(url){
+  if(!url)return null;url=url.trim();
+  let m=url.match(/youtube\.com\/embed\/([A-Za-z0-9_-]{11})/);
+  if(!m) m=url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if(!m) m=url.match(/youtube\.com\/live\/([A-Za-z0-9_-]{11})/);
+  if(!m) m=url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+  if(!m) m=url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+/* Kept for compatibility with any other callers expecting an embed URL string */
+function ytToEmbed(url){
+  const id=extractVideoId(url);
+  return id?`https://www.youtube.com/embed/${id}?autoplay=1&mute=0&enablejsapi=1&playsinline=1`:null;
+}
+
+/* ── Load the YouTube IFrame API once ── */
+(function loadYTApi(){
+  if(window.YT && window.YT.Player){ ytApiReady=true; return; }
+  const tag=document.createElement('script');
+  tag.src='https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+/* Called automatically by the YouTube API script once it has loaded */
+window.onYouTubeIframeAPIReady=function(){
+  ytApiReady=true;
+  if(pendingVideoId) createOrLoadPlayer(pendingVideoId);
+};
+
+function createOrLoadPlayer(videoId){
+  if(!ytApiReady){ pendingVideoId=videoId; return; }
+  const mountEl=document.getElementById('chFrame');
+  if(!mountEl) return;
+  if(ytPlayer && typeof ytPlayer.loadVideoById==='function'){
+    /* Reuse existing player — just swap the video, no flicker */
+    ytPlayer.loadVideoById(videoId);
+    ytPlayer.setVolume(lastVolume);
+    if(isMuted) ytPlayer.mute(); else ytPlayer.unMute();
+    return;
+  }
+  mountEl.innerHTML='<div id="ytMount" style="width:100%;height:100%"></div>';
+  ytPlayer=new YT.Player('ytMount',{
+    videoId:videoId,
+    width:'100%',height:'100%',
+    playerVars:{autoplay:1,mute:0,playsinline:1,rel:0,modestbranding:1},
+    events:{
+      onReady:function(e){
+        e.target.setVolume(lastVolume);
+        e.target.playVideo();
+        updateMuteIcon();
+      },
+      onError:function(){
+        handleStreamError();
+      }
+    }
+  });
+}
+
+/* When a saved/hardcoded video ID has expired (live broadcast ended),
+   show a clear message with a one-click way to jump to the channel's
+   current live broadcast instead of failing silently. */
+function handleStreamError(){
+  const ch=CHANNELS[curCh];
+  document.getElementById('chFrame').classList.remove('on');
+  document.getElementById('chVolRow').style.display='none';
+  const ph=document.getElementById('chPlaceholder');
+  ph.classList.remove('hidden');
+  document.getElementById('chLogo').style.background=ch.logo;
+  document.getElementById('chLogo').textContent=ch.ic;
+  document.getElementById('chPname').textContent=ch.name;
+  document.getElementById('chPdesc').innerHTML=`This saved video has ended and is no longer available.<br><br><a href="${ch.liveUrl||ch.yt}" target="_blank" rel="noopener" style="color:var(--cyan);font-weight:700;text-decoration:underline">▶ Open ${ch.name}'s current live stream</a><br><br>Or paste a fresh YouTube live link below.`;
+  /* Clear the stale saved URL so it doesn't keep retrying a dead video */
+  localStorage.removeItem('mk_ch_'+ch.id);
+  document.getElementById('chInp').value='';
+  mkSay(`${ch.name}'s saved stream ended. Click the link in the player to jump to their live broadcast.`);
+}
+
+function buildChTabs(){
+  const el=document.getElementById('chTabs');if(!el)return;
+  el.innerHTML=CHANNELS.map((ch,i)=>`<div class="ch-tab${i===0?' on':''}" onclick="selectCh(${i})">${ch.ic}</div>`).join('');
+}
+buildChTabs();
+
+function selectCh(i){
+  curCh=i;
+  const ch=CHANNELS[i];
+  document.querySelectorAll('.ch-tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  /* Saved URL takes priority; otherwise fall back to the channel's hardcoded live link */
+  const saved=localStorage.getItem('mk_ch_'+ch.id) || ch.yt || '';
+  document.getElementById('chInp').value=saved;
+  const vid=extractVideoId(saved);
+  if(vid){
+    showPlayer(ch);
+    pendingVideoId=vid;
+    createOrLoadPlayer(vid);
+  } else {
+    showPlaceholder(ch);
+  }
+  document.getElementById('chLinks').innerHTML=`
+    <a href="${ch.yt}" target="_blank" rel="noopener" class="ch-link" style="background:${ch.btn}">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>Open Live
+    </a>
+    <a href="${ch.web}" target="_blank" rel="noopener" class="ch-link" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)">🌐 Website</a>`;
+  document.getElementById('chPlayBtn').style.background=ch.btn;
+}
+
+function showPlayer(ch){
+  document.getElementById('chPlaceholder').classList.add('hidden');
+  document.getElementById('chFrame').classList.add('on');
+  document.getElementById('chVolRow').style.display='flex';
+}
+function showPlaceholder(ch){
+  document.getElementById('chFrame').classList.remove('on');
+  document.getElementById('chVolRow').style.display='none';
+  const ph=document.getElementById('chPlaceholder');ph.classList.remove('hidden');
+  document.getElementById('chLogo').style.background=ch.logo;
+  document.getElementById('chLogo').textContent=ch.ic;
+  document.getElementById('chPname').textContent=ch.name;
+  document.getElementById('chPdesc').textContent=ch.desc+'\n\nPaste a YouTube live URL below to watch here.';
+}
+
+function playChannel(){
+  const ch=CHANNELS[curCh];
+  const url=document.getElementById('chInp').value.trim();
+  if(!url){mkSay('Paste a YouTube link first!');return;}
+  const vid=extractVideoId(url);
+  if(!vid){mkSay('Invalid YouTube URL. Try a link like youtube.com/watch?v=XXXX or youtube.com/live/XXXX');return;}
+  localStorage.setItem('mk_ch_'+ch.id,url);
+  showPlayer(ch);
+  pendingVideoId=vid;
+  createOrLoadPlayer(vid);
+  mkSay(`▶ Playing ${ch.name} live — it'll keep streaming automatically!`);
+}
+
+function clearChannel(){
+  const ch=CHANNELS[curCh];
+  document.getElementById('chInp').value='';
+  localStorage.removeItem('mk_ch_'+ch.id);
+  showPlaceholder(ch);
+}
+
+/* ── Volume controls (use real YT.Player API) ── */
+function setVol(v){
+  v=Number(v);
+  lastVolume=v;
+  document.getElementById('chVolPct').textContent=v+'%';
+  if(ytPlayer && typeof ytPlayer.setVolume==='function'){
+    ytPlayer.setVolume(v);
+    if(v===0){ isMuted=true; ytPlayer.mute(); }
+    else if(isMuted){ isMuted=false; ytPlayer.unMute(); }
+  }
+  updateMuteIcon();
+}
+function toggleMute(){
+  if(!ytPlayer) return;
+  if(isMuted){
+    ytPlayer.unMute();
+    ytPlayer.setVolume(lastVolume||80);
+    isMuted=false;
+  } else {
+    ytPlayer.mute();
+    isMuted=true;
+  }
+  updateMuteIcon();
+}
+function updateMuteIcon(){
+  const btn=document.getElementById('chMuteBtn');
+  if(!btn)return;
+  const v=document.getElementById('chVolSlider').value;
+  btn.textContent=isMuted||v==0?'🔇':v<50?'🔉':'🔊';
+}
+
+/* Enter key on input */
+document.getElementById('chInp').addEventListener('keydown',e=>{if(e.key==='Enter')playChannel();});
+
+/* Init first channel — autoplays automatically using its hardcoded live link, no click needed */
+selectCh(0);
+</script>
+</body>
+</html>

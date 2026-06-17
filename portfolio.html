@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Portfolio — MARKETO AI™</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#04080F;color:#F1F0FF;-webkit-font-smoothing:antialiased;min-height:100vh}
+:root{--bg:#04080F;--bg2:#080320;--card:#0C0A28;--card2:#12103A;--blue:#0066FF;--cyan:#00D4FF;--ok:#00D084;--bad:#FF4D4F;--warn:#FFB020;--text:#F1F0FF;--text2:#C4C0FF;--muted:#6B6890;--bdr:rgba(0,100,255,.15);--bdr2:rgba(0,212,255,.28);--fd:'Space Grotesk','Inter',system-ui;}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#080320}::-webkit-scrollbar-thumb{background:#0066FF;border-radius:2px}
+.topbar{height:58px;background:rgba(4,8,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px;padding:0 18px;position:sticky;top:0;z-index:100}
+.t-logo{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:16px;font-weight:800;color:var(--text)}.t-logo .ai{color:var(--cyan)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:inherit}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#0052CC}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--bdr2)}.btn-ghost:hover{background:rgba(0,100,255,.08);color:#fff}
+.btn-sm{padding:5px 12px;font-size:11px;border-radius:6px}
+.main{max-width:1280px;margin:0 auto;padding:24px}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.pg-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text)}
+.pg-sub{font-size:12px;color:var(--muted);margin-top:2px}
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.sum-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.sc-b::before{background:var(--blue)}.sc-g::before{background:var(--ok)}.sc-r::before{background:var(--bad)}.sc-y::before{background:var(--warn)}.sc-c::before{background:var(--cyan)}
+.sum-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.sum-v{font-size:clamp(16px,2vw,22px);font-weight:800;font-family:var(--fd)}
+.sum-s{font-size:11px;font-weight:600;margin-top:3px}
+/* LEDGER */
+.ledger-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:18px}
+.led-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.led-item{text-align:center;padding:12px;background:rgba(255,255,255,.03);border-radius:10px}
+.led-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.led-v{font-size:15px;font-weight:700;font-family:var(--fd)}
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.filter-input{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;font-family:inherit;width:220px}
+.filter-input::placeholder{color:var(--muted)}
+select.filter-sel{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;font-family:inherit;cursor:pointer}
+/* TABLE */
+.tbl-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:14px;overflow:hidden}
+.ptbl{width:100%;border-collapse:collapse}
+.ptbl th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:11px 13px;text-align:left;border-bottom:1px solid var(--bdr);background:var(--card2);cursor:pointer;transition:color .2s;white-space:nowrap}
+.ptbl th:hover{color:var(--cyan)}
+.ptbl td{padding:9px 13px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+.ptbl tr:last-child td{border-bottom:none}
+.ptbl tr:hover td{background:rgba(0,100,255,.04)}
+.sn{font-weight:600;color:var(--text);font-size:13px}
+.sc{font-size:9px;color:var(--muted)}
+.sig{display:inline-block;padding:2px 8px;border-radius:5px;font-size:9px;font-weight:700}
+.sig-b{background:rgba(0,208,132,.12);color:var(--ok)}.sig-h{background:rgba(255,176,32,.12);color:var(--warn)}.sig-e{background:rgba(255,77,79,.12);color:var(--bad)}
+/* SECTOR CHART */
+.sec-chart{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.sec-row{display:flex;align-items:center;gap:10px;font-size:11px}
+.sec-name{color:var(--text2);width:100px;flex-shrink:0}
+.sec-bar-w{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.sec-bar{height:100%;border-radius:3px}
+.sec-val{color:var(--muted);width:50px;text-align:right;flex-shrink:0}
+@media(max-width:900px){.sum-grid{grid-template-columns:repeat(2,1fr)}.led-g{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.sum-grid{grid-template-columns:1fr}}
+
+/* ══ CHARACTER ENGINE STYLES ══ */
+.mk-char{display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;z-index:10;filter:drop-shadow(0 0 30px rgba(0,100,255,.4));transition:filter .4s}
+.mk-char:hover{filter:drop-shadow(0 0 44px rgba(0,180,255,.6))}
+.mk-ants{display:flex;gap:56px;margin-bottom:-4px;position:relative;z-index:3}
+.mk-ant{display:flex;flex-direction:column;align-items:center}
+.mk-ant-b{width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#60C0FF,#0066FF);box-shadow:0 0 8px rgba(0,180,255,.8);animation:antG 2s ease-in-out infinite;transition:background .6s,box-shadow .6s}
+.mk-ant:last-child .mk-ant-b{animation-delay:-.7s}
+.mk-pulse-up .mk-ant-b{background:linear-gradient(135deg,#6EE7B7,#00D084)!important;box-shadow:0 0 8px rgba(0,208,132,.85)!important}
+.mk-pulse-down .mk-ant-b{background:linear-gradient(135deg,#FCA5A5,#FF4D4F)!important;box-shadow:0 0 8px rgba(255,77,79,.85)!important}
+.mk-ant-p{width:5px;height:20px;background:linear-gradient(to bottom,#5BA0E0,#1A3A8A);border-radius:2px}
+.mk-hp{position:relative;width:158px;height:30px;margin-bottom:-10px;z-index:3}
+.mk-hp-band{position:absolute;left:8px;right:8px;top:0;height:20px;border:0 solid transparent;border-top:9px solid #0A2E8A;border-left:7px solid transparent;border-right:7px solid transparent;border-radius:50% 50% 0 0/100% 100% 0 0}
+.mk-hp-band::after{content:'';position:absolute;left:4px;right:4px;top:-7px;height:12px;border:0 solid transparent;border-top:5px solid #1A5AFF;border-left:5px solid transparent;border-right:5px solid transparent;border-radius:50% 50% 0 0/100% 100% 0 0}
+.mk-hp-cup{position:absolute;bottom:0;width:26px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1A5AFF,#0A2480);box-shadow:inset -2px -2px 5px rgba(0,0,0,.4),0 0 8px rgba(0,100,255,.3)}
+.mk-hp-cup::after{content:'';position:absolute;inset:4px;border-radius:4px;background:radial-gradient(circle at 40% 35%,rgba(100,180,255,.35),rgba(0,20,100,.5))}
+.mk-hp-l{left:0}.mk-hp-r{right:0}
+.mk-head{width:152px;height:142px;border-radius:50% 50% 44% 44%/52% 52% 48% 48%;background:radial-gradient(ellipse at 33% 26%,rgba(255,255,255,.88) 0%,rgba(255,255,255,0) 52%),linear-gradient(155deg,#FFFFFF 0%,#EEF4FF 32%,#C8DEFF 65%,#8ABAFF 100%);position:relative;z-index:4;box-shadow:inset -7px -7px 18px rgba(0,0,80,.12),inset 4px 4px 12px rgba(255,255,255,.65)}
+.mk-head::before{content:'';position:absolute;left:10%;right:10%;bottom:0;height:38%;background:linear-gradient(to top,rgba(80,140,255,.2),transparent);border-radius:0 0 50% 50%}
+.mk-face{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:106px;height:80px;border-radius:14px;background:#000B1E;border:2px solid rgba(0,150,255,.4);box-shadow:0 0 12px rgba(0,100,255,.3),inset 0 0 18px rgba(0,0,40,.8);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.mk-face::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 11px,rgba(0,80,200,.05) 11px,rgba(0,80,200,.05) 12px),repeating-linear-gradient(90deg,transparent,transparent 11px,rgba(0,80,200,.05) 11px,rgba(0,80,200,.05) 12px)}
+.mk-face::after{content:'';position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,rgba(0,180,255,.55),transparent);animation:scan 3.5s linear infinite}
+.mk-eyes{display:flex;gap:18px;align-items:center;position:relative;z-index:2}
+.mk-eye{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#80EEFF 0%,#00D4FF 50%,#007AA0 100%);box-shadow:0 0 10px rgba(0,212,255,.85),0 0 22px rgba(0,180,255,.4);position:relative;animation:eblink 4s ease-in-out infinite;transition:background .4s,box-shadow .4s}
+.mk-eye:last-child{animation-delay:.28s}
+.mk-eye::before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.88);top:3px;left:5px}
+.mk-eye::after{content:'';position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(0,80,140,.55);bottom:5px;right:4px}
+.mk-mouth{position:relative;z-index:2;width:40px;height:11px;overflow:hidden}
+.mk-mc{position:absolute;width:40px;height:22px;border-radius:50%;border:2.5px solid rgba(0,180,255,.6);top:-11px;transition:all .4s}
+.mk-neck{width:28px;height:10px;background:linear-gradient(to bottom,#C8DEFF,#90B8EE);border-radius:0 0 4px 4px;margin-top:-3px;z-index:3;position:relative}
+.mk-bwrap{display:flex;align-items:flex-start;position:relative;z-index:4;margin-top:-2px}
+.mk-arm{width:24px;display:flex;flex-direction:column;align-items:center;padding-top:7px;transition:transform .4s}
+.mk-arm-u{width:18px;height:30px;border-radius:9px;background:linear-gradient(155deg,#E8F2FF,#B0CDFF);box-shadow:inset -2px -2px 5px rgba(0,0,80,.14)}
+.mk-arm-lo{width:16px;height:24px;border-radius:7px;background:linear-gradient(155deg,#D0E4FF,#9ABCEE);margin-top:-2px;box-shadow:inset -1px -1px 4px rgba(0,0,80,.1)}
+.mk-hand{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FFFFFF,#D0E4FF);margin-top:-2px;box-shadow:0 2px 5px rgba(0,0,80,.14)}
+.mk-arm-l{transform-origin:top right}.mk-arm-r{transform-origin:top left}
+.mk-torso{width:100px;background:linear-gradient(155deg,#1A5AFF 0%,#0A2E8A 58%,#051A5E 100%);border-radius:16px 16px 20px 20px;position:relative;box-shadow:inset -4px -4px 11px rgba(0,0,0,.35),inset 3px 3px 9px rgba(80,140,255,.28),0 4px 18px rgba(0,60,200,.4);overflow:hidden}
+.mk-torso-t{height:48px}.mk-torso-b{height:38px;background:linear-gradient(155deg,#0A2E8A,#051A5E);border-top:1px solid rgba(0,180,255,.18)}
+.mk-torso::after{content:'';position:absolute;top:0;left:6px;width:36px;height:55%;background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);border-radius:0 0 50% 50%}
+.mk-chest{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(0,80,200,.4),rgba(0,20,80,.7));border:2px solid rgba(0,180,255,.5);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,180,255,.5);animation:chestP 2.2s ease-in-out infinite}
+.mk-chest-i{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#00D4FF,#0066FF);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;font-family:system-ui}
+.mk-belt{position:absolute;top:46px;left:0;right:0;height:4px;background:linear-gradient(90deg,#040E40,#1A5AFF,#040E40)}
+.mk-buckle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12px;height:7px;background:radial-gradient(circle,#00D4FF,#0066FF);border-radius:2px}
+.mk-legs{display:flex;gap:12px;justify-content:center;position:relative;z-index:4;margin-top:-2px}
+.mk-leg{display:flex;flex-direction:column;align-items:center}
+.mk-hoverring{
+.mk-thigh{width:28px;height:26px;border-radius:4px 4px 0 0;background:linear-gradient(155deg,#1248CC,#0A2480);box-shadow:inset -2px 0 5px rgba(0,0,0,.25)}
+.mk-shin{width:24px;height:24px;border-radius:0 0 4px 4px;background:linear-gradient(155deg,#1A5AFF,#0A2E8A);margin-top:-1px;box-shadow:inset -2px 0 5px rgba(0,0,0,.2)}
+.mk-foot{width:32px;height:11px;border-radius:4px 4px 5px 5px;background:linear-gradient(135deg,#E8F2FF,#B0CDFF);margin-top:-1px;box-shadow:0 3px 7px rgba(0,0,80,.22)}
+.mk-idle .mk-char{animation:mkFloat 3.6s ease-in-out infinite}
+.mk-idle .mk-arm-l{animation:mkWave 2s ease-in-out infinite 2s}
+.mk-think .mk-char{animation:mkTilt .95s ease-in-out infinite}
+.mk-think .mk-arm-r{animation:mkThinkArm 1.8s ease-in-out infinite}
+.mk-analyze .mk-char{animation:mkBreathe 2.2s ease-in-out infinite}
+.mk-analyze .mk-arm-r{animation:mkPoint 2.5s ease-in-out infinite}
+.mk-speak .mk-char{animation:mkBob 1.2s ease-in-out infinite}
+.mk-speak .mk-arm-l{animation:mkGestL 1.8s ease-in-out infinite}
+.mk-speak .mk-arm-r{animation:mkGestR 1.8s ease-in-out infinite .3s}
+.mk-success .mk-char{animation:mkJump .7s ease-in-out 4}
+.mk-success .mk-arm-l{animation:mkVicL .7s ease-in-out 4}
+.mk-success .mk-arm-r{animation:mkVicR .7s ease-in-out 4}
+.mk-alert .mk-char{animation:mkShake .28s ease-in-out infinite}
+.mk-love .mk-char{animation:mkFloat 3s ease-in-out infinite}
+.mk-celebrate .mk-char{animation:mkCelebrate 1.6s ease-in-out 2}
+.mk-celebrate .mk-arm-l{animation:mkVicL 1.6s ease-in-out 2}
+.mk-celebrate .mk-arm-r{animation:mkVicR 1.6s ease-in-out 2 .1s}
+.mk-angry .mk-char{animation:mkAngry .22s ease-in-out infinite}
+.mk-sleep .mk-char{animation:mkSleep 6s ease-in-out infinite}
+.eyes-happy .mk-eye{background:radial-gradient(circle at 34% 30%,#A7F3D0,#10B981,#065F46)!important;box-shadow:0 0 10px rgba(16,185,129,.9),0 0 22px rgba(16,185,129,.4)!important}
+.eyes-think .mk-eye{background:radial-gradient(circle at 34% 30%,#FEF08A,#F59E0B,#92400E)!important;box-shadow:0 0 10px rgba(245,158,11,.9),0 0 22px rgba(245,158,11,.4)!important}
+.eyes-bad  .mk-eye{background:radial-gradient(circle at 34% 30%,#FECACA,#EF4444,#991B1B)!important;box-shadow:0 0 10px rgba(239,68,68,.9),0 0 22px rgba(239,68,68,.4)!important}
+.eyes-love .mk-eye{background:radial-gradient(circle at 34% 30%,#FCA5A5,#EC4899,#9D174D)!important;box-shadow:0 0 10px rgba(236,72,153,.9),0 0 22px rgba(236,72,153,.4)!important}
+.eyes-sleep .mk-eye{height:5px!important;margin-top:10px!important;background:rgba(0,40,100,.5)!important;box-shadow:none!important;animation:none!important}
+.eyes-sleep .mk-eye::before,.eyes-sleep .mk-eye::after{display:none!important}
+.mouth-happy .mk-mc{top:-9px;border-color:rgba(16,185,129,.75)!important}
+.mouth-sad   .mk-mc{top:4px;transform:rotate(180deg);border-color:rgba(239,68,68,.7)!important}
+.mouth-flat  .mk-mc{display:none}
+.mouth-flat .mk-mouth::after{content:'';position:absolute;left:3px;right:3px;top:4px;height:2px;background:rgba(0,150,255,.5);border-radius:2px}
+
+/* ── KEYFRAMES ── */
+@keyframes antG{0%,100%{box-shadow:0 0 8px rgba(0,180,255,.8)}50%{box-shadow:0 0 18px rgba(0,212,255,1)}}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:.7}90%{opacity:.7}100%{top:100%;opacity:0}}
+@keyframes eblink{0%,82%,100%{transform:scaleY(1)}88%{transform:scaleY(.06)}}
+@keyframes chestP{0%,100%{box-shadow:0 0 14px rgba(0,180,255,.5)}50%{box-shadow:0 0 26px rgba(0,212,255,.9)}}
+@keyframes mkFloat   {0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes mkTilt    {0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-7px)}}
+@keyframes mkBreathe {0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.03)}}
+@keyframes mkBob     {0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes mkJump    {0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-34px) scale(1.08)}68%{transform:translateY(-11px) scale(.97)}}
+@keyframes mkShake   {0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+@keyframes mkCelebrate{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-28px) rotate(-13deg)}50%{transform:translateY(-32px) rotate(0)}75%{transform:translateY(-28px) rotate(13deg)}100%{transform:translateY(0) rotate(0)}}
+@keyframes mkAngry   {0%,100%{transform:translateX(0) scale(1)}25%{transform:translateX(-8px) scale(1.02)}75%{transform:translateX(8px) scale(1.02)}}
+@keyframes mkSleep   {0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes mkWave    {0%,100%,50%{transform:rotate(0)}15%{transform:rotate(-40deg)}30%{transform:rotate(-22deg)}45%{transform:rotate(-40deg)}}
+@keyframes mkThinkArm{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(-15deg) translateY(-4px)}}
+@keyframes mkPoint   {0%,100%{transform:rotate(0)}50%{transform:rotate(-28deg) translateY(-5px)}}
+@keyframes mkGestL   {0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+@keyframes mkGestR   {0%,100%{transform:rotate(0)}50%{transform:rotate(17deg)}}
+@keyframes mkVicL    {0%,100%{transform:rotate(0)}40%{transform:rotate(-52deg)}}
+@keyframes mkVicR    {0%,100%{transform:rotate(0)}40%{transform:rotate(52deg)}}
+
+/* ── FLIGHT MODE (Superman pose + forward launch + blue trail) ── */
+.mk-flight .mk-char{animation:mkFlightLaunch 1.8s ease-in forwards}
+.mk-flight .mk-arm-l{animation:mkFlightArm 1.8s ease-in forwards}
+.mk-flight .mk-arm-r{animation:mkFlightArm 1.8s ease-in forwards}
+.mk-flight .mk-legs{animation:mkFlightLegs 1.8s ease-in forwards}
+.mk-flight .mk-hoverring{opacity:0}
+.mk-flight-trail{
+  position:absolute;left:50%;top:50%;width:6px;height:60px;
+  background:linear-gradient(to top,rgba(0,212,255,0),rgba(0,212,255,.85));
+  border-radius:50%;transform:translate(-50%,0) scaleY(0);transform-origin:top center;
+  opacity:0;pointer-events:none;z-index:1;
+  animation:mkTrailGrow 1.8s ease-in forwards;
+}
+.mk-flight .mk-flight-trail{opacity:1}
+@keyframes mkFlightLaunch{
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  30%{transform:translateY(-10px) rotate(-4deg) scale(1.02)}
+  100%{transform:translateY(-340px) rotate(-3deg) scale(.4)}
+}
+@keyframes mkFlightArm{0%{transform:rotate(0)}100%{transform:rotate(-78deg)}}
+@keyframes mkFlightLegs{0%{transform:scaleY(1)}100%{transform:scaleY(.7) translateY(6px)}}
+@keyframes mkTrailGrow{0%{transform:translate(-50%,0) scaleY(0);opacity:0}20%{opacity:1}100%{transform:translate(-50%,0) scaleY(6);opacity:0}}
+
+/* ── THINKING HOLOGRAM PARTICLES ── */
+.mk-think-holo,.mk-analyze .mk-think-holo{
+  position:absolute;inset:-30px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:2;
+}
+.mk-think .mk-think-holo,.mk-analyze .mk-think-holo{opacity:1}
+.mk-holo-dot{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:radial-gradient(circle,#00D4FF,rgba(0,150,255,.2));
+  box-shadow:0 0 8px rgba(0,212,255,.8);
+  animation:holoOrbit 3s linear infinite;
+}
+.mk-holo-dot:nth-child(1){top:10%;left:50%;animation-delay:0s}
+.mk-holo-dot:nth-child(2){top:50%;left:90%;animation-delay:-1s}
+.mk-holo-dot:nth-child(3){top:85%;left:30%;animation-delay:-2s}
+@keyframes holoOrbit{
+  0%{transform:rotate(0deg) translateX(40px) rotate(0deg);opacity:.3}
+  50%{opacity:1}
+  100%{transform:rotate(360deg) translateX(40px) rotate(-360deg);opacity:.3}
+}
+
+/* ── ENGINE WRAPPER (self-contained — no dependency on page-level styles) ── */
+.mk-state-root{display:inline-flex;flex-direction:column;align-items:center;position:relative}
+.mk-speech-wrap{position:absolute;top:-10px;right:-10px;transform:translateX(60%);z-index:30;animation:mkSpeechBob 3.2s ease-in-out infinite}
+.mk-speech{background:rgba(12,10,40,.96);border:1px solid rgba(0,212,255,.3);border-radius:12px 12px 12px 0;padding:9px 14px;font-size:12px;font-weight:600;color:#66E0FF;white-space:nowrap;max-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s}
+@keyframes mkSpeechBob{0%,100%{transform:translateX(60%) translateY(0)}50%{transform:translateX(60%) translateY(-6px)}}
+/* ── MARKETO FLOATING PRESENCE (consistent across platform) ── */
+.mk-platform-float{position:fixed;bottom:16px;right:16px;z-index:600;cursor:pointer}
+.mk-platform-bubble{
+  position:absolute;bottom:calc(100% + 10px);right:0;background:#0A0824;
+  border:1.5px solid rgba(0,212,255,.3);border-radius:10px 10px 0 10px;
+  padding:8px 12px;font-size:11px;color:#66E0FF;font-weight:500;max-width:200px;
+  text-align:right;line-height:1.5;display:none;white-space:normal;box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.mk-platform-bubble.show{display:block}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="t-logo"><svg viewBox="0 0 32 32" width="26" height="26" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="15" fill="#0A1842" stroke="#0066FF" stroke-width="1.5"/><rect x="7" y="10" width="18" height="14" rx="4.5" fill="#001433"/><circle cx="12" cy="17" r="3" fill="#00D4FF"/><circle cx="20" cy="17" r="3" fill="#00D4FF"/></svg>MARKETO <span class="ai">AI™</span></a>
+  <span style="font-size:13px;color:var(--muted);padding:4px 12px;background:rgba(255,176,32,.08);border-radius:20px;border:1px solid rgba(255,176,32,.25)">💼 Portfolio — Pushpa Rani</span>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <a href="dashboard.html" class="btn btn-ghost">Dashboard</a>
+    <a href="brain.html" class="btn btn-blue">Marketo Brain™</a>
+  </div>
+</header>
+
+<div class="main">
+  <div class="pg-head">
+    <div>
+      <div class="pg-title">Portfolio Tracker</div>
+      <div class="pg-sub">Pushpa Rani · Sharekhan Demat 13486360 · Last updated: Jun 14, 2026</div>
+    </div>
+    <button class="btn btn-blue" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sum-grid">
+    <div class="sum-card sc-b"><div class="sum-l">Invested Value</div><div class="sum-v" style="color:var(--text)">₹8,01,212</div><div class="sum-s" style="color:var(--muted)">Total cost basis</div></div>
+    <div class="sum-card sc-r"><div class="sum-l">Current Value</div><div class="sum-v" style="color:var(--text)">₹7,78,765</div><div class="sum-s" style="color:var(--bad)">−₹22,447</div></div>
+    <div class="sum-card sc-r"><div class="sum-l">Overall P&L</div><div class="sum-v" style="color:var(--bad)">−₹22,447</div><div class="sum-s" style="color:var(--bad)">−2.80%</div></div>
+    <div class="sum-card sc-g"><div class="sum-l">Total Stocks</div><div class="sum-v" style="color:var(--cyan)">70+</div><div class="sum-s" style="color:var(--muted)">Active positions</div></div>
+    <div class="sum-card sc-y"><div class="sum-l">Best Performer</div><div class="sum-v" style="color:var(--ok)">+156%</div><div class="sum-s" style="color:var(--ok)">ICICIGI</div></div>
+  </div>
+
+  <!-- LEDGER -->
+  <div class="ledger-card">
+    <div style="font-family:var(--fd);font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">📋 Account Ledger — Apr to Jun 2026</div>
+    <div class="led-g">
+      <div class="led-item"><div class="led-l">Opening Balance</div><div class="led-v" style="color:var(--cyan)">₹14,403</div></div>
+      <div class="led-item"><div class="led-l">Total Debit</div><div class="led-v" style="color:var(--bad)">₹46,941</div></div>
+      <div class="led-item"><div class="led-l">Total Credit</div><div class="led-v" style="color:var(--ok)">₹56,632</div></div>
+      <div class="led-item"><div class="led-l">Closing Balance</div><div class="led-v" style="color:var(--ok)">₹9,691</div></div>
+    </div>
+  </div>
+
+  <!-- FILTER ROW -->
+  <div class="filter-row">
+    <input class="filter-input" placeholder="🔍 Search stock..." oninput="filterTable(this.value)" id="fInput">
+    <select class="filter-sel" onchange="filterSig(this.value)">
+      <option value="">All Signals</option>
+      <option value="BUY">BUY</option>
+      <option value="HOLD">HOLD</option>
+      <option value="EXIT">EXIT</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted);margin-left:auto" id="rowCount"></span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-wrap">
+    <table class="ptbl" id="portTbl">
+      <thead><tr>
+        <th onclick="sortTable('name')">Stock ↕</th>
+        <th>Sector</th>
+        <th onclick="sortTable('qty')">Qty ↕</th>
+        <th onclick="sortTable('avg')">Avg Price ↕</th>
+        <th>CMP</th>
+        <th onclick="sortTable('inv')">Invested ↕</th>
+        <th>Current</th>
+        <th onclick="sortTable('pl')">P&L ↕</th>
+        <th onclick="sortTable('pct')">Return% ↕</th>
+        <th>AI Signal</th>
+      </tr></thead>
+      <tbody id="portBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ MARKETO PLATFORM PRESENCE ══ -->
+<div class="mk-platform-float" id="mk-platform-float">
+  <div class="mk-platform-bubble" id="mk-platform-bubble">Namaste! Tap me for Marketo Brain™ 🧠</div>
+  <div id="mk-platform-mount" onclick="window.location.href='brain.html'" title="MARKETO AI"></div>
+</div>
+
+<script>
+/* ══ CHARACTER ENGINE ══ */
+/* ════════════════════════════════════════════════════════════════
+   MARKETO CHARACTER ENGINE
+   ════════════════════════════════════════════════════════════════
+   One central component that renders and controls every MARKETO
+   character instance across the platform (landing page, dashboard,
+   portfolio, watchlist, brain, loading screens, captain mode).
+
+   ARCHITECTURE — built for a future asset swap with zero call-site
+   changes:
+
+     CharacterEngine.mount(containerId, options)
+         -> renders a character instance into the given container
+         -> returns an instance handle with .setState(), .speak(), etc.
+
+     Internally, rendering is delegated to a RENDERER. Today the
+     renderer is CSS_RENDERER (builds the existing hand-built CSS/HTML
+     character). Later, when a real MARKETO asset exists (PNG, WebP,
+     or a 3D .glb model), a new renderer can be implemented with the
+     same four methods and swapped in by changing ONE line --
+     CharacterEngine.activeRenderer -- without touching any page that
+     calls CharacterEngine.mount(). Every page in the platform should
+     only ever call the public CharacterEngine API below, never reach
+     into renderer internals directly.
+
+   USAGE (any page):
+     <div id="marketo-hero"></div>
+     <script src="js/character-engine.js"></script>
+     <script>
+       const marketo = CharacterEngine.mount('marketo-hero', {
+         size: 1,
+         initialState: 'idle',
+         clickToCycle: true,
+         showHoverRing: true
+       });
+       marketo.setState('success');
+       marketo.speak('SBILIFE up +143%! 🎉');
+     </script>
+   ════════════════════════════════════════════════════════════════ */
+
+(function(global){
+  'use strict';
+
+  /* ── STATE DEFINITIONS ──
+     Single source of truth for every expression state across the
+     whole platform. Adding a new state here makes it available to
+     every page automatically. */
+  const STATES = {
+    idle:      { cls:'mk-idle',      eyeC:'',            mouthC:'',            torsoC:'' },
+    think:     { cls:'mk-think',     eyeC:'eyes-think',  mouthC:'',            torsoC:'' },
+    analyze:   { cls:'mk-analyze',   eyeC:'eyes-think',  mouthC:'',            torsoC:'' },
+    speak:     { cls:'mk-speak',     eyeC:'',            mouthC:'mouth-happy', torsoC:'' },
+    success:   { cls:'mk-success',   eyeC:'eyes-happy',  mouthC:'mouth-happy', torsoC:'' },
+    alert:     { cls:'mk-alert',     eyeC:'eyes-bad',     mouthC:'mouth-sad',   torsoC:'' },
+    love:      { cls:'mk-love',      eyeC:'eyes-love',   mouthC:'mouth-happy', torsoC:'' },
+    celebrate: { cls:'mk-celebrate', eyeC:'eyes-happy',  mouthC:'mouth-happy', torsoC:'' },
+    angry:     { cls:'mk-angry',     eyeC:'eyes-bad',     mouthC:'mouth-sad',   torsoC:'' },
+    sleep:     { cls:'mk-sleep',     eyeC:'eyes-sleep',  mouthC:'mouth-flat',  torsoC:'' },
+    flight:    { cls:'mk-flight',    eyeC:'',            mouthC:'',            torsoC:'' },
+  };
+  const ALL_STATE_CLASSES = Object.values(STATES).map(function(s){return s.cls;});
+
+  let uidCounter = 0;
+  function nextUid(){ return 'mke' + (++uidCounter); }
+
+  /* ── CSS RENDERER (current implementation) ──
+     Builds the hand-crafted CSS/HTML MARKETO character. This is the
+     ONLY place that knows the actual DOM structure of the CSS
+     character -- if/when a sprite or 3D renderer is added, it lives
+     in its own object below this one, and CharacterEngine.mount()
+     just picks whichever renderer is active. */
+  const CSS_RENDERER = {
+    render: function(container, uid, opts){
+      const scale = opts.size || 1;
+      const initState = STATES[opts.initialState || 'idle'];
+      container.innerHTML =
+        '<div class="mk-state-root ' + initState.cls + '" id="' + uid + '-state" style="transform:scale(' + scale + ')">' +
+          '<div class="mk-char" id="' + uid + '-char"' + (opts.clickToCycle ? ' onclick="CharacterEngine._handleClick(\'' + uid + '\')"' : '') + '>' +
+            '<div class="mk-ants">' +
+              '<div class="mk-ant"><div class="mk-ant-b"></div><div class="mk-ant-p"></div></div>' +
+              '<div class="mk-ant"><div class="mk-ant-b"></div><div class="mk-ant-p"></div></div>' +
+            '</div>' +
+            '<div class="mk-hp">' +
+              '<div class="mk-hp-band"></div>' +
+              '<div class="mk-hp-cup mk-hp-l"></div>' +
+              '<div class="mk-hp-cup mk-hp-r"></div>' +
+            '</div>' +
+            '<div class="mk-head">' +
+              '<div class="mk-face">' +
+                '<div class="mk-eyes" id="' + uid + '-eyes"><div class="mk-eye"></div><div class="mk-eye"></div></div>' +
+                '<div class="mk-mouth" id="' + uid + '-mouth"><div class="mk-mc"></div></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="mk-neck"></div>' +
+            '<div class="mk-bwrap" id="' + uid + '-bwrap">' +
+              '<div class="mk-arm mk-arm-l"><div class="mk-arm-u"></div><div class="mk-arm-lo"></div><div class="mk-hand"></div></div>' +
+              '<div class="mk-torso" id="' + uid + '-torso">' +
+                '<div class="mk-torso-t"><div class="mk-chest"><div class="mk-chest-i">M</div></div></div>' +
+                '<div class="mk-torso-b"><div class="mk-belt"><div class="mk-buckle"></div></div></div>' +
+              '</div>' +
+              '<div class="mk-arm mk-arm-r"><div class="mk-arm-u"></div><div class="mk-arm-lo"></div><div class="mk-hand"></div></div>' +
+            '</div>' +
+            '<div class="mk-legs">' +
+              '<div class="mk-leg"><div class="mk-thigh"></div><div class="mk-shin"></div><div class="mk-foot"></div></div>' +
+              '<div class="mk-leg"><div class="mk-thigh"></div><div class="mk-shin"></div><div class="mk-foot"></div></div>' +
+            '</div>' +
+            (opts.showHoverRing !== false ? '<div class="mk-hoverring"></div>' : '') +
+            '<div class="mk-think-holo"><div class="mk-holo-dot"></div><div class="mk-holo-dot"></div><div class="mk-holo-dot"></div></div>' +
+            '<div class="mk-flight-trail"></div>' +
+          '</div>' +
+          (opts.showSpeechBubble ? '<div class="mk-speech-wrap"><div class="mk-speech" id="' + uid + '-speech"></div></div>' : '') +
+        '</div>';
+    },
+    applyState: function(uid, stateName){
+      const s = STATES[stateName] || STATES.idle;
+      const root = document.getElementById(uid+'-state');
+      if(!root) return;
+      ALL_STATE_CLASSES.forEach(function(c){ root.classList.remove(c); });
+      root.classList.add(s.cls);
+      const eyes = document.getElementById(uid+'-eyes');
+      if(eyes){ eyes.className='mk-eyes'; if(s.eyeC) eyes.classList.add(s.eyeC); }
+      const mouth = document.getElementById(uid+'-mouth');
+      if(mouth){ mouth.className='mk-mouth'; if(s.mouthC) mouth.classList.add(s.mouthC); }
+      const bwrap = document.getElementById(uid+'-bwrap');
+      if(bwrap){ bwrap.className='mk-bwrap'; if(s.torsoC) bwrap.classList.add(s.torsoC); }
+    },
+    speak: function(uid, text){
+      const el = document.getElementById(uid+'-speech');
+      if(!el) return;
+      el.style.opacity = '0';
+      setTimeout(function(){ el.textContent = text; el.style.opacity = '1'; }, 200);
+    },
+    setMarketPulse: function(uid, up){
+      const charEl = document.getElementById(uid+'-char');
+      if(!charEl) return;
+      charEl.classList.remove('mk-pulse-up','mk-pulse-down');
+      charEl.classList.add(up ? 'mk-pulse-up' : 'mk-pulse-down');
+    }
+  };
+
+  /* ── FUTURE RENDERER STUB ──
+     When a real generated MARKETO asset (PNG/WebP/GLB) is ready,
+     implement this object with the same four methods (render,
+     applyState, speak, setMarketPulse) and flip
+     CharacterEngine.activeRenderer to 'asset'. No page-level code
+     needs to change -- every page calls the same public API. */
+  const ASSET_RENDERER = {
+    render: function(container, uid, opts){
+      console.warn('ASSET_RENDERER not yet implemented -- falling back to CSS_RENDERER. Drop in the generated MARKETO asset and implement this renderer to switch over.');
+      CSS_RENDERER.render(container, uid, opts);
+    },
+    applyState: function(uid, stateName){ CSS_RENDERER.applyState(uid, stateName); },
+    speak: function(uid, text){ CSS_RENDERER.speak(uid, text); },
+    setMarketPulse: function(uid, up){ CSS_RENDERER.setMarketPulse(uid, up); }
+  };
+
+  const RENDERERS = { css: CSS_RENDERER, asset: ASSET_RENDERER };
+
+  /* ── PUBLIC ENGINE API ── */
+  const instances = {};
+  const clickHandlers = {};
+
+  const CharacterEngine = {
+    /* Change this single value to 'asset' once a real renderer is
+       implemented. Every mounted instance picks it up automatically. */
+    activeRenderer: 'css',
+    _lastClick: 0,
+
+    mount: function(containerId, options){
+      options = options || {};
+      const container = document.getElementById(containerId);
+      if(!container){
+        console.error('CharacterEngine.mount: no element with id', containerId);
+        return null;
+      }
+      const uid = nextUid();
+      const renderer = RENDERERS[this.activeRenderer] || CSS_RENDERER;
+      renderer.render(container, uid, options);
+
+      const instance = {
+        uid: uid,
+        containerId: containerId,
+        currentState: options.initialState || 'idle',
+        setState: function(stateName){
+          if(!STATES[stateName]){ console.warn('Unknown MARKETO state:', stateName); return; }
+          this.currentState = stateName;
+          renderer.applyState(uid, stateName);
+        },
+        speak: function(text){ renderer.speak(uid, text); },
+        setMarketPulse: function(up){ renderer.setMarketPulse(uid, up); },
+        cycleDemo: function(order){
+          clickHandlers[uid] = { order: order || ['idle','success','think','alert','sleep'], i:0 };
+        }
+      };
+      if(options.cycleOrder) instance.cycleDemo(options.cycleOrder);
+      instances[uid] = instance;
+      return instance;
+    },
+
+    getInstance: function(uid){ return instances[uid]; },
+
+    /* Internal -- called by the onclick handler the CSS renderer wires up */
+    _handleClick: function(uid){
+      const inst = instances[uid];
+      const cycle = clickHandlers[uid];
+      if(!inst) return;
+      if(!cycle){ return; }
+      const now = Date.now();
+      if(this._lastClick && now - this._lastClick < 500) return;
+      this._lastClick = now;
+      cycle.i = (cycle.i + 1) % cycle.order.length;
+      inst.setState(cycle.order[cycle.i]);
+    },
+
+    /* Convenience: sync antenna market-pulse color across every mounted
+       instance on the page at once, given live up/down direction. */
+    syncAllMarketPulse: function(isUp){
+      Object.keys(instances).forEach(function(uid){ instances[uid].setMarketPulse(isUp); });
+    },
+
+    listStates: function(){ return Object.keys(STATES); }
+  };
+
+  global.CharacterEngine = CharacterEngine;
+
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+let mkPlatform=null;
+function mountPlatformCharacter(){
+  if(document.getElementById('mk-platform-mount')){
+    mkPlatform = CharacterEngine.mount('mk-platform-mount', {
+      size: 0.4, initialState: 'idle', showHoverRing: false
+    });
+  }
+}
+function mkPlatformGreet(){
+  const b=document.getElementById('mk-platform-bubble');
+  if(!b)return;
+  b.classList.toggle('show');
+  if(b.classList.contains('show')) setTimeout(()=>b.classList.remove('show'), 4000);
+}
+mountPlatformCharacter();
+</script>
+
+<script>
+const HOLDINGS=[
+  {name:'ABDL',sec:'Finance',qty:10,avg:236,cmp:208,sig:'HOLD'},
+  {name:'AFCONS',sec:'Infra',qty:20,avg:487,cmp:421,sig:'HOLD'},
+  {name:'BLS',sec:'Services',qty:50,avg:298,cmp:272,sig:'HOLD'},
+  {name:'BOROSCI',sec:'Glass',qty:20,avg:892,cmp:748,sig:'HOLD'},
+  {name:'CDSL',sec:'Finance',qty:10,avg:1245,cmp:1380,sig:'HOLD'},
+  {name:'COLORACC',sec:'Paints',qty:30,avg:112,cmp:98,sig:'HOLD'},
+  {name:'DCM',sec:'Textiles',qty:100,avg:85,cmp:72,sig:'HOLD'},
+  {name:'DCMFINSER',sec:'Finance',qty:50,avg:74,cmp:61,sig:'HOLD'},
+  {name:'DELHIVERY',sec:'Logistics',qty:40,avg:342,cmp:298,sig:'HOLD'},
+  {name:'DHANI',sec:'Finance',qty:200,avg:44,cmp:32,sig:'EXIT'},
+  {name:'EPIGRAL',sec:'Chemicals',qty:10,avg:1340,cmp:1180,sig:'HOLD'},
+  {name:'EQUITASBNK',sec:'Banking',qty:200,avg:88,cmp:74,sig:'HOLD'},
+  {name:'ESTER',sec:'Polyester',qty:100,avg:72,cmp:58,sig:'HOLD'},
+  {name:'GICRE',sec:'Insurance',qty:25,avg:382,cmp:440,sig:'BUY'},
+  {name:'GILLETTE',sec:'FMCG',qty:5,avg:6420,cmp:7100,sig:'HOLD'},
+  {name:'HDFCBANK',sec:'Banking',qty:60,avg:956,cmp:772,sig:'HOLD'},
+  {name:'HDFCLIFE',sec:'Insurance',qty:50,avg:290,cmp:555,sig:'HOLD'},
+  {name:'HYUNDAI',sec:'Auto',qty:38,avg:1812,cmp:1990,sig:'BUY'},
+  {name:'ICICIGI',sec:'Insurance',qty:22,avg:661,cmp:1695,sig:'HOLD'},
+  {name:'IIFLSEC',sec:'Finance',qty:100,avg:87,cmp:74,sig:'HOLD'},
+  {name:'ITC',sec:'FMCG',qty:100,avg:241,cmp:285,sig:'BUY'},
+  {name:'KLIFESTYL',sec:'Lifestyle',qty:200,avg:42,cmp:18,sig:'EXIT'},
+  {name:'KPITTECH',sec:'IT',qty:15,avg:1280,cmp:1120,sig:'HOLD'},
+  {name:'LEMONTREE',sec:'Hotels',qty:100,avg:98,cmp:112,sig:'HOLD'},
+  {name:'MACINDIA',sec:'Auto',qty:50,avg:124,cmp:108,sig:'HOLD'},
+  {name:'MANPASAND',sec:'Beverages',qty:100,avg:42,cmp:18,sig:'EXIT'},
+  {name:'MFSL',sec:'Finance',qty:30,avg:698,cmp:762,sig:'HOLD'},
+  {name:'MOTHERSON',sec:'Auto',qty:100,avg:142,cmp:128,sig:'HOLD'},
+  {name:'NAVNETEDUL',sec:'Education',qty:100,avg:88,cmp:112,sig:'HOLD'},
+  {name:'NBCC',sec:'Infra',qty:200,avg:62,cmp:54,sig:'HOLD'},
+  {name:'NUVOCO',sec:'Cement',qty:50,avg:282,cmp:248,sig:'HOLD'},
+  {name:'OLAELEC',sec:'EV',qty:100,avg:76,cmp:45,sig:'EXIT'},
+  {name:'OLECTRA',sec:'EV',qty:20,avg:1480,cmp:1220,sig:'HOLD'},
+  {name:'OPTIEMUS',sec:'Electronics',qty:50,avg:348,cmp:312,sig:'HOLD'},
+  {name:'ORIENTBELL',sec:'Tiles',qty:30,avg:298,cmp:262,sig:'HOLD'},
+  {name:'PATANJALI',sec:'FMCG',qty:20,avg:1580,cmp:1740,sig:'BUY'},
+  {name:'PCJEWELLER',sec:'Jewellery',qty:200,avg:82,cmp:58,sig:'EXIT'},
+  {name:'POLYCAB',sec:'Cables',qty:10,avg:4280,cmp:4620,sig:'BUY'},
+  {name:'PPAP',sec:'Auto',qty:50,avg:148,cmp:132,sig:'HOLD'},
+  {name:'PREMIERENE',sec:'Energy',qty:100,avg:74,cmp:62,sig:'HOLD'},
+  {name:'RFCL',sec:'Finance',qty:100,avg:42,cmp:38,sig:'HOLD'},
+  {name:'RITES',sec:'Infra',qty:30,avg:382,cmp:342,sig:'HOLD'},
+  {name:'RTNPOWER',sec:'Power',qty:500,avg:8,cmp:6,sig:'EXIT'},
+  {name:'RUPA',sec:'Textiles',qty:50,avg:282,cmp:248,sig:'HOLD'},
+  {name:'SAKSOFT',sec:'IT',qty:50,avg:418,cmp:388,sig:'HOLD'},
+  {name:'SBILIFE',sec:'Insurance',qty:21,avg:700,cmp:1706,sig:'HOLD'},
+  {name:'SBICARD',sec:'Finance',qty:30,avg:742,cmp:688,sig:'HOLD'},
+  {name:'SCHAEFFLER',sec:'Auto',qty:10,avg:3280,cmp:3640,sig:'HOLD'},
+  {name:'SEPC',sec:'Infra',qty:200,avg:48,cmp:38,sig:'EXIT'},
+  {name:'SHRIRAMFIN',sec:'Finance',qty:20,avg:1840,cmp:2080,sig:'BUY'},
+  {name:'SIEMENS',sec:'Capital Goods',qty:5,avg:5620,cmp:6240,sig:'BUY'},
+  {name:'SJVN',sec:'Power',qty:200,avg:88,cmp:74,sig:'HOLD'},
+  {name:'SOBHA',sec:'Realty',qty:20,avg:882,cmp:968,sig:'HOLD'},
+  {name:'STYRENIX',sec:'Chemicals',qty:20,avg:1482,cmp:1640,sig:'HOLD'},
+  {name:'SUNFLAG',sec:'Steel',qty:100,avg:78,cmp:68,sig:'HOLD'},
+  {name:'TANLA',sec:'IT',qty:20,avg:842,cmp:748,sig:'HOLD'},
+  {name:'TATASTEEL',sec:'Metals',qty:50,avg:162,cmp:142,sig:'HOLD'},
+  {name:'TATVA',sec:'Water',qty:30,avg:1082,cmp:1180,sig:'HOLD'},
+  {name:'TIPSFILMS',sec:'Media',qty:30,avg:242,cmp:282,sig:'BUY'},
+  {name:'TORNTPOWER',sec:'Power',qty:20,avg:1280,cmp:1380,sig:'HOLD'},
+  {name:'TRIVENI',sec:'Water',qty:50,avg:348,cmp:412,sig:'BUY'},
+  {name:'UGROCAP',sec:'Finance',qty:100,avg:148,cmp:128,sig:'HOLD'},
+  {name:'UNICHEMLAB',sec:'Pharma',qty:20,avg:682,cmp:748,sig:'HOLD'},
+  {name:'VAIBHAVGBL',sec:'Jewellery',qty:10,avg:1482,cmp:1240,sig:'HOLD'},
+  {name:'VGUARD',sec:'Consumer',qty:30,avg:282,cmp:312,sig:'HOLD'},
+  {name:'VINDHYATEL',sec:'Telecom',qty:20,avg:1482,cmp:1840,sig:'BUY'},
+  {name:'WIPRO',sec:'IT',qty:20,avg:162,cmp:180,sig:'HOLD'},
+  {name:'XPROINDIA',sec:'Chemicals',qty:30,avg:348,cmp:298,sig:'HOLD'},
+  {name:'YESBANK',sec:'Banking',qty:300,avg:28,cmp:22,sig:'EXIT'},
+  {name:'ZEEL',sec:'Media',qty:100,avg:148,cmp:98,sig:'EXIT'},
+  {name:'ZENTEC',sec:'IT',qty:50,avg:88,cmp:112,sig:'BUY'},
+];
+let filtered=[...HOLDINGS],sortKey='',sortDir=1,sigFilter='';
+function fmt(n){return n>=0?'+₹'+n.toLocaleString('en-IN'):'−₹'+Math.abs(n).toLocaleString('en-IN')}
+function renderTable(data){
+  document.getElementById('rowCount').textContent=data.length+' holdings';
+  document.getElementById('portBody').innerHTML=data.map(h=>{
+    const inv=Math.round(h.qty*h.avg);
+    const cur=Math.round(h.qty*h.cmp);
+    const pl=cur-inv;const pct=((pl/inv)*100).toFixed(1);
+    const pc=pl>=0?'var(--ok)':'var(--bad)';
+    const sc=h.sig==='BUY'?'sig-b':h.sig==='EXIT'?'sig-e':'sig-h';
+    return`<tr><td><div class="sn">${h.name}</div></td><td><div class="sc" style="color:var(--muted)">${h.sec}</div></td><td>${h.qty}</td><td>₹${h.avg.toLocaleString('en-IN')}</td><td style="font-weight:600">₹${h.cmp.toLocaleString('en-IN')}</td><td>₹${inv.toLocaleString('en-IN')}</td><td>₹${cur.toLocaleString('en-IN')}</td><td style="color:${pc};font-weight:700">${fmt(pl)}</td><td style="color:${pc};font-weight:700">${pct>=0?'+':''}${pct}%</td><td><span class="sig ${sc}">${h.sig}</span></td></tr>`;
+  }).join('');
+}
+function filterTable(q){
+  const v=q.toLowerCase();
+  filtered=HOLDINGS.filter(h=>(h.name.toLowerCase().includes(v)||h.sec.toLowerCase().includes(v))&&(!sigFilter||h.sig===sigFilter));
+  renderTable(filtered);
+}
+function filterSig(s){sigFilter=s;filterTable(document.getElementById('fInput').value);}
+function sortTable(k){
+  if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}
+  filtered.sort((a,b)=>{
+    const va=k==='name'?a.name:k==='qty'?a.qty:k==='avg'?a.avg:k==='inv'?a.qty*a.avg:k==='pl'?a.qty*(a.cmp-a.avg):a.qty*(a.cmp-a.avg)/(a.qty*a.avg);
+    const vb=k==='name'?b.name:k==='qty'?b.qty:k==='avg'?b.avg:k==='inv'?b.qty*b.avg:k==='pl'?b.qty*(b.cmp-b.avg):b.qty*(b.cmp-b.avg)/(b.qty*b.avg);
+    return va>vb?sortDir:va<vb?-sortDir:0;
+  });
+  renderTable(filtered);
+}
+function exportCSV(){
+  const h='Stock,Sector,Qty,Avg Price,CMP,Invested,Current,P&L,Return%,Signal\n';
+  const rows=HOLDINGS.map(h=>{
+    const inv=Math.round(h.qty*h.avg),cur=Math.round(h.qty*h.cmp),pl=cur-inv,pct=((pl/inv)*100).toFixed(1);
+    return`${h.name},${h.sec},${h.qty},${h.avg},${h.cmp},${inv},${cur},${pl},${pct}%,${h.sig}`;
+  }).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(h+rows);
+  a.download='MARKETO_Portfolio_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+renderTable(filtered);
+</script>
+</body>
+</html>
